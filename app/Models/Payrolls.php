@@ -50,7 +50,6 @@ public float $rate_potongan_jam = 0;
     $this->total_tunjangan = $this->tunjangan * $this->jumlah_hari;
     $this->total_premi_kehadiran = $this->premi_kehadiran * $this->jumlah_hari;
 
-    // ✅ Ini bagian penting:
     $this->potongan_kekurangan_jam = $this->rate_potongan_jam * $this->kekurangan_jam;
 
     $this->penerimaan = (

@@ -47,19 +47,15 @@ class KubikasiBalkenResource extends Resource
             ->columns([
                    TextColumn::make('tanggal_dibuat')
                     ->label('Tanggal Tally')
-                    ->date(),
+                    ->date()
+                    ,
                 TextColumn::make('nomor_polisi')
                     ->label('Nomor Polisi'),
-                    
                 TextColumn::make('total_balken')
                     ->label('Total Balken')
                     ->numeric(),
+            ])                    ->searchable()  
 
-                TextColumn::make('total_volume')
-                    ->label('Total Volume')
-                    ->numeric(),
-             
-            ])
             ->defaultSort(null)
             // Disable actions that don't make sense for grouped data
             ->actions([

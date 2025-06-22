@@ -12,10 +12,6 @@ input: [
             refresh: true,
         }),
     ],
-    resolve: {
-        alias: {
-        'filament': path.resolve(__dirname, 'vendor/filament/filament/resources/css'),
-        },
-    },
+
 
 });

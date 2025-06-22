@@ -9,6 +9,9 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -23,7 +26,20 @@ class CostResource extends Resource
     {
         return $form
             ->schema([
-                //
+                TextInput::make('tipe'),
+                TextInput::make('supplier'),
+                Select::make('grade')->options([
+                    'kotak'=>'Kotak',
+                    'ds4'=>'DS4',
+                    'ongrade'=>'On Grade',
+                    'allgrade'=>'All Grade',
+                    'afkir'=>'Afkir',
+                ]),
+TextInput::make('harga')
+    ->label('Harga')
+    ->prefix('Rp')
+    ->numeric()
+    ->rules(['numeric', 'min:0']),
             ]);
     }
 
@@ -31,7 +47,9 @@ class CostResource extends Resource
     {
         return $table
             ->columns([
-                //
+                TextColumn::make('tipe'),
+                TextColumn::make('grade'),
+                TextColumn::make('harga'),
             ])
             ->filters([
                 //
@@ -41,7 +59,6 @@ class CostResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -57,8 +74,6 @@ class CostResource extends Resource
     {
         return [
             'index' => Pages\ListCosts::route('/'),
-            'create' => Pages\CreateCost::route('/create'),
-            'edit' => Pages\EditCost::route('/{record}/edit'),
         ];
     }
 }
