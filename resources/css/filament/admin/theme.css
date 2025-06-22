@@ -1,0 +1,11 @@
+@import '../theme-base.css'; /* ⬅️ ini mengembalikan CSS default filament */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    .btn-custom {
+        @apply bg-blue-600 text-white px-4 py-2 rounded;
+    }
+}
