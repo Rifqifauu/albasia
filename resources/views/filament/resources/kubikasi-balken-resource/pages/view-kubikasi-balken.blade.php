@@ -38,7 +38,7 @@
                 <p class="text-sm text-gray-600 dark:text-gray-300 font-medium">
                     Total Jumlah Balken
                 </p>
-                <p class="text-3xl font-bold text-primary-800 dark:text-primary-500">
+                <p class="text-3xl font-bold text-gray-800 dark:text-gray-300">
                     {{ number_format($total_jumlah) }}
                 </p>
                 <p class="text-xs text-gray-500 dark:text-gray-400">balken</p>
