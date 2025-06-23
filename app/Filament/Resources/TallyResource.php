@@ -43,13 +43,13 @@ class TallyResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('no_register')
-                    ->label('No Register'),
+                    ->label('No Register')
+                    ->wrap(),
                 TextColumn::make('nomor_polisi')
                     ->label('Nomor Polisi'),
-                TextColumn::make('total_balken')
-                    ->label('Total Balken'),
-                TextColumn::make('total_volume')
-                    ->label('Total Volume'),
+            
+                TextColumn::make('status')
+                    ->label('Status'),
                 TextColumn::make('created_at')
                     ->label('Tanggal Tally')
                     ->dateTime('d M Y, H:i')

@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class CostResource extends Resource
 {
     protected static ?string $model = Cost::class;
+protected static ?int $navigationSort = 10;
 
     protected static ?string $navigationIcon = 'heroicon-o-calculator';
 

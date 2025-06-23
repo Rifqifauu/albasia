@@ -23,6 +23,7 @@ use Carbon\Carbon;
 class KubikasiBalkenResource extends Resource
 {
     protected static ?string $model = Tallies::class;
+protected static ?int $navigationSort = 4;
     protected static ?string $navigationLabel = 'Kubikasi Balken';
     protected static ?string $navigationIcon = 'heroicon-o-queue-list';
 

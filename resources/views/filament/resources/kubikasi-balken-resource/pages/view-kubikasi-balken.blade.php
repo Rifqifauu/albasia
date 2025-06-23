@@ -160,9 +160,9 @@
                             <th class="px-4 py-3 text-right dark:text-primary-500">Tebal</th>
                             <th class="px-4 py-3 text-right dark:text-primary-500">Lebar</th>
                             <th class="px-4 py-3 text-right dark:text-primary-500">Panjang</th>
-                                                        <th class="px-4 py-3 text-right dark:text-primary-500">Volume Satuan</th>
-
                             <th class="px-4 py-3 text-right dark:text-primary-500">Jumlah</th>
+                            <th class="px-4 py-3 text-right dark:text-primary-500">Total Volume</th>
+                            
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -172,8 +172,9 @@
                                 <td class="px-4 py-3 text-right text-primary-900 dark:text-white">{{ $detail->tebal }}</td>
                                 <td class="px-4 py-3 text-right text-primary-900 dark:text-white">{{ $detail->lebar }}</td>
                                 <td class="px-4 py-3 text-right text-primary-900 dark:text-white">{{ $detail->panjang }}</td>
+                                                                                                <td class="px-4 py-3 text-right text-primary-900 dark:text-white">{{ number_format($detail->total_jumlah) }}</td>
+
                                 <td class="px-4 py-3 text-right text-primary-900 dark:text-white">{{ number_format($detail->total_volume) }} cm3</td>
-                                                                <td class="px-4 py-3 text-right text-primary-900 dark:text-white">{{ number_format($detail->total_jumlah) }}</td>
 
                </tr>
                         @endforeach

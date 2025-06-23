@@ -32,6 +32,13 @@ class EditTally extends EditRecord
     TextInput::make('nomor_polisi')
         ->label('Nomor Polisi')
         ->required(),
+          Select::make('status')
+        ->label('Status')
+        ->options([
+            'basah'=>'Basah',
+            'kering'=>'Kering',
+        ])
+        ->required(),
 
     TextInput::make('total_volume')
         ->label('Total Volume')
