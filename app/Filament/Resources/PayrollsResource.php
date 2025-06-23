@@ -66,7 +66,7 @@ protected static ?int $navigationSort = 3;
                     ->prefix('Rp')
                     ->required(),
 
-                TextInput::make('potongan_kekurangan_jam')
+                TextInput::make('rate_potongan_jam')
                     ->numeric()
                     ->prefix('Rp')
                     ->required(),
@@ -90,9 +90,9 @@ protected static ?int $navigationSort = 3;
                     ->date('d M Y'),
             
 
-                // TextColumn::make('jumlah_hari')->label('Hari Kerja'),
-                // TextColumn::make('jumlah_lembur')->label('Lembur')->suffix(' Jam'),
-                // TextColumn::make('kekurangan_jam')->label('Kurang')->suffix(' Jam'),
+                TextColumn::make('jumlah_hari')->label('Hari Kerja'),
+                TextColumn::make('jumlah_lembur')->label('Lembur')->suffix(' Jam'),
+                TextColumn::make('kekurangan_jam')->label('Kurang')->suffix(' Jam'),
 
                 // TextColumn::make('total_upah')->money('IDR', true),
                 // TextColumn::make('total_lembur')->money('IDR', true),

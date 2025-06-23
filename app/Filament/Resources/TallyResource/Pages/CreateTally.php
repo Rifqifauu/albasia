@@ -83,8 +83,9 @@ class CreateTally extends CreateRecord
                 ->afterStateUpdated(function ($state, callable $get, callable $set) {
                     $lebar = $get('lebar');
                     $panjang = $get('panjang');
-                    if ($state && $lebar && $panjang) {
-                        $set('volume', $state * $lebar * $panjang);
+                    $jumlah = $get('jumlah');
+                    if ($state && $lebar && $panjang && $jumlah) {
+                        $set('volume', $state * $lebar * $panjang*$jumlah);
                     }
                 }),
 
@@ -96,8 +97,9 @@ class CreateTally extends CreateRecord
                 ->afterStateUpdated(function ($state, callable $get, callable $set) {
                     $tebal = $get('tebal');
                     $panjang = $get('panjang');
-                    if ($tebal && $state && $panjang) {
-                        $set('volume', $tebal * $state * $panjang);
+                    $jumlah = $get('jumlah');
+                    if ($tebal && $panjang && $state) {
+                        $set('volume', $tebal * $panjang * $state* $jumlah);
                     }
                 }),
 
@@ -106,18 +108,30 @@ class CreateTally extends CreateRecord
                 ->numeric()
                 ->reactive()
                 ->debounce(500)
+                ->numeric() 
                 ->afterStateUpdated(function ($state, callable $get, callable $set) {
                     $tebal = $get('tebal');
                     $lebar = $get('lebar');
-                    if ($tebal && $lebar && $state) {
-                        $set('volume', $tebal * $lebar * $state);
+                    $jumlah = $get('jumlah');
+                    if ($tebal && $lebar && $state && $jumlah) {
+                        $set('volume', $tebal * $lebar * $state* $jumlah);
                     }
                 }),
 
             
             TextInput::make('jumlah')
                 ->label('Jumlah')
-                ->numeric(),
+                  ->reactive()
+                ->debounce(500)
+                ->numeric() ->afterStateUpdated(function ($state, callable $get, callable $set) {
+                    $tebal = $get('tebal');
+                    $lebar = $get('lebar');
+                    $panjang = $get('panjang');
+                    if ($tebal && $lebar && $state && $panjang) {
+                        $set('volume', $tebal * $lebar * $state* $panjang);
+                    }
+                }),
+                
                 TextInput::make('volume')
                 ->label('Volume')
                 ->numeric()

@@ -6,6 +6,10 @@ use App\Filament\Resources\KubikasiBalkenResource\Pages;
 use App\Filament\Resources\KubikasiBalkenResource\RelationManagers;
 use App\Models\Tallies;
 use App\Models\Pallets;
+use Filament\Tables\Filters\Filter;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Grid;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Tables\Columns\TextColumn;
@@ -14,6 +18,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Carbon\Carbon;
 
 class KubikasiBalkenResource extends Resource
 {
@@ -37,7 +42,7 @@ class KubikasiBalkenResource extends Resource
                     ->selectRaw('
                         MIN(id) as id,
                         nomor_polisi, 
-                        DATE(created_at) as tanggal_dibuat, 
+                        DATE(created_at) as created_at, 
                         SUM(total_balken) as total_balken, 
                         SUM(total_volume) as total_volume
                     ')
@@ -45,32 +50,96 @@ class KubikasiBalkenResource extends Resource
                     ->orderByRaw('DATE(created_at) asc, nomor_polisi asc');
             })
             ->columns([
-                   TextColumn::make('tanggal_dibuat')
+                TextColumn::make('created_at')
                     ->label('Tanggal Tally')
                     ->date()
-                    ,
+                    ->searchable(),
                 TextColumn::make('nomor_polisi')
-                    ->label('Nomor Polisi'),
+                    ->label('Nomor Polisi')
+                    ->searchable(),
                 TextColumn::make('total_balken')
                     ->label('Total Balken')
                     ->numeric(),
-            ])                    ->searchable()  
+            ])
+            ->filters([
+                // Filter berdasarkan tanggal
+                Filter::make('tanggal_range')
+                    ->form([
+                        Grid::make(2)
+                            ->schema([
+                                DatePicker::make('tanggal_dari')
+                                    ->label('Tanggal Dari')
+                                    ->placeholder('Pilih tanggal mulai'),
+                                DatePicker::make('tanggal_sampai')
+                                    ->label('Tanggal Sampai')
+                                    ->placeholder('Pilih tanggal akhir'),
+                            ]),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['tanggal_dari'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                            )
+                            ->when(
+                                $data['tanggal_sampai'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                            );
+                    })
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
 
+                        if ($data['tanggal_dari'] ?? null) {
+                            $indicators[] = 'Dari: ' . Carbon::parse($data['tanggal_dari'])->format('d/m/Y');
+                        }
+
+                        if ($data['tanggal_sampai'] ?? null) {
+                            $indicators[] = 'Sampai: ' . Carbon::parse($data['tanggal_sampai'])->format('d/m/Y');
+                        }
+
+                        return $indicators;
+                    }),
+                // Filter berdasarkan nomor polisi
+                Filter::make('nomor_polisi')
+                    ->form([
+                        Select::make('nomor_polisi_filter')
+                            ->label('Nomor Polisi')
+                            ->placeholder('Pilih nomor polisi')
+                            ->options(function () {
+                                return Tallies::select('nomor_polisi')
+                                    ->distinct()
+                                    ->orderBy('nomor_polisi')
+                                    ->pluck('nomor_polisi', 'nomor_polisi')
+                                    ->toArray();
+                            })
+                            ->searchable(),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            $data['nomor_polisi_filter'],
+                            fn (Builder $query, $nopol): Builder => $query->where('nomor_polisi', $nopol),
+                        );
+                    })
+                    ->indicateUsing(function (array $data): ?string {
+                        if ($data['nomor_polisi_filter'] ?? null) {
+                            return 'Nomor Polisi: ' . $data['nomor_polisi_filter'];
+                        }
+
+                        return null;
+                    }),
+            ])
             ->defaultSort(null)
-            // Disable actions that don't make sense for grouped data
             ->actions([
-                 Tables\Actions\Action::make('view')
-        ->label('Lihat Detail')
-        ->url(fn ($record) => route('filament.admin.resources.kubikasi-balkens.view', [
-            'tanggal' => $record->tanggal_dibuat,
-            'nomor_polisi' => $record->nomor_polisi,
-        ]))
-        ->icon('heroicon-o-eye'),
+                Tables\Actions\Action::make('view')
+                    ->label('Lihat Detail')
+                    ->url(fn ($record) => route('filament.admin.resources.kubikasi-balkens.view', [
+                        'tanggal' => $record->created_at,
+                        'nomor_polisi' => $record->nomor_polisi,
+                    ]))
+                    ->icon('heroicon-o-eye'),
             ])
             ->bulkActions([]);
     }
-
-
 
     public static function getRelations(): array
     {
@@ -88,14 +157,10 @@ class KubikasiBalkenResource extends Resource
     {
         return [
             'index' => Pages\ListKubikasiBalkens::route('/'),
-        'view' => Pages\ViewKubikasiBalken::route('/{tanggal}/{nomor_polisi}'),
-            // Remove create/edit since they don't make sense for aggregated data
-            // 'create' => Pages\CreateKubikasiBalken::route('/create'),
-            // 'edit' => Pages\EditKubikasiBalken::route('/{record}/edit'),
+            'view' => Pages\ViewKubikasiBalken::route('/{tanggal}/{nomor_polisi}'),
         ];
     }
 
-    // Override this method to prevent create/edit actions
     public static function canCreate(): bool
     {
         return false;

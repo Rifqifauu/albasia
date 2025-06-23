@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Payrolls extends Model
 {
     use HasFactory;
-public float $rate_potongan_jam = 0;
     protected $fillable = [
         'employee_id',
         'periode_awal',
@@ -16,6 +15,7 @@ public float $rate_potongan_jam = 0;
         'jumlah_hari',
         'jumlah_lembur',
         'kekurangan_jam',
+        'rate_potongan_jam',
         'upah',
         'tunjangan',
         'premi_kehadiran',

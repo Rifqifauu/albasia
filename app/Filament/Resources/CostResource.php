@@ -49,7 +49,7 @@ TextInput::make('harga')
             ->columns([
                 TextColumn::make('tipe'),
                 TextColumn::make('grade'),
-                TextColumn::make('harga'),
+                TextColumn::make('harga')->prefix('Rp'),
             ])
             ->filters([
                 //

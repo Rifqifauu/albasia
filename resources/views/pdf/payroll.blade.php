@@ -79,7 +79,7 @@
                         <tr><td class="label">Sampai Dengan</td><td>{{ $record->periode_akhir }}</td></tr>
                         <tr><td class="label">Jumlah Hari</td><td>{{ $record->jumlah_hari }}</td></tr>
                         <tr><td class="label">Lembur</td><td>{{ $record->jumlah_lembur }} Jam</td></tr>
-                       <tr> <td class="label">Kurang</td>                        <td>{{ $record->kekurangan_jam }} Jam</td></tr>
+                       <tr> <td class="label">Kurang</td><td>{{ $record->kekurangan_jam }} Jam</td></tr>
                     </table>
                 </div>
             </td>

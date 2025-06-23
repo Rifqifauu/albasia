@@ -8,6 +8,8 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
+use Illuminate\Database\Eloquent\Builder;
+
 
 class PalletsRelationManager extends RelationManager
 {
@@ -16,16 +18,16 @@ class PalletsRelationManager extends RelationManager
     public function form(Forms\Form $form): Forms\Form
     {
         return $form->schema([
-          
+            // Tambahkan field sesuai kebutuhan
         ]);
     }
 
     public function table(Tables\Table $table): Tables\Table
     {
         return $table->columns([
-TextColumn::make('no')
-    ->label('No')
-    ->state(fn ($record, $livewire) => $livewire->getTableRecords()->search(fn ($r) => $r->getKey() === $record->getKey()) + 1),
+            TextColumn::make('no')
+                ->label('No')
+                ->state(fn ($record, $livewire) => $livewire->getTableRecords()->search(fn ($r) => $r->getKey() === $record->getKey()) + 1),
             TextColumn::make('grade'),
             TextColumn::make('tebal'),
             TextColumn::make('lebar'),
@@ -41,4 +43,15 @@ TextColumn::make('no')
             Tables\Actions\DeleteAction::make(),
         ]);
     }
+
+
+public function getTableQuery(): Builder
+{
+    return $this->getRelationship()
+        ->getQuery()
+        ->orderByDesc('tebal')
+        ->orderByDesc('lebar')
+        ->orderByDesc('panjang');
+}
+
 }

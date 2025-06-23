@@ -30,11 +30,8 @@ class AdminPanelProvider extends PanelProvider
                           ->path('admin')
             ->login()
          ->colors([
-    'primary' => Color::Amber,
-    'success' => Color::Emerald,
-    'info'    => Color::Blue,
-    'warning' => Color::Amber,
-    'danger'  => Color::Red,
+    'primary' => Color::Blue,
+
 ])
 
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
@@ -44,8 +41,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
+                
             ])
             ->middleware([
                 EncryptCookies::class,
