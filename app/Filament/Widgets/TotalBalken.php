@@ -51,6 +51,7 @@ class TotalBalken extends ChartWidget
 }
 
 
+
     protected function getType(): string
     {
         return 'line'; // bisa diganti ke 'bar' kalau kamu mau
