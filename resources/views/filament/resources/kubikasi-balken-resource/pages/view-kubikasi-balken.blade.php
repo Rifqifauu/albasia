@@ -93,7 +93,7 @@
                             <th class="px-4 py-3 text-primary-800 dark:text-primary-200">Grade</th>
                             <th class="px-4 py-3 text-right dark:text-primary-500">Jumlah</th>
                             <th class="px-4 py-3 text-right dark:text-primary-500">Volume</th>
-                            <th class="px-4 py-3 text-right dark:text-primary-500">Harga <span class="text-xs">/cm3</span></th>
+                            <th class="px-4 py-3 text-right dark:text-primary-500">Harga <span class="text-xs">/m3</span></th>
                             <th class="px-4 py-3 text-right dark:text-primary-500">Total Harga </th>
                         </tr>
                     </thead>
@@ -101,8 +101,8 @@
     @foreach ($pallets as $pallet)
         @php
             $grade = strtoupper($pallet->grade);
-            $hargaPerCm = $cost[$grade]->harga ?? 0;
-            $totalHarga = $pallet->total_volume * $hargaPerCm;
+            $hargaPerM = $cost[$grade]->harga ?? 0;
+            $totalHarga = $pallet->total_volume * $hargaPerM;
         @endphp
         <tr class="hover:bg-primary-50 dark:hover:bg-primary-500/10 transition-colors">
             <td class="px-4 py-3">
@@ -123,10 +123,10 @@
                 {{ number_format($pallet->total_jumlah) }}
             </td>
             <td class="px-4 py-3 text-right text-primary-900 dark:text-white">
-                {{ number_format($pallet->total_volume) }} cm3
+                {{ number_format($pallet->total_volume , 4, ',','')}} m3
             </td>
             <td class="px-4 py-3 text-right text-primary-900 dark:text-white">
-                {{ 'Rp ' . number_format($hargaPerCm, 2, ',', '.') }}
+                {{ 'Rp ' . number_format($hargaPerM, 2, ',', '.') }}
             </td>
             <td class="px-4 py-3 text-right text-primary-900 dark:text-white">
                 {{ 'Rp ' . number_format($totalHarga, 2, ',', '.') }}
@@ -142,7 +142,7 @@
                                 {{ number_format($total_jumlah) }}
                             </td>
                             <td class="px-4 py-3 text-right text-primary-900 dark:text-white">
-                                {{ number_format($total_volume, 2) }}
+                                {{ number_format($total_volume, 4) }}
                             </td>
                         </tr>
                     </tfoot>
@@ -174,7 +174,7 @@
                                 <td class="px-4 py-3 text-right text-primary-900 dark:text-white">{{ $detail->panjang }}</td>
                                                                                                 <td class="px-4 py-3 text-right text-primary-900 dark:text-white">{{ number_format($detail->total_jumlah) }}</td>
 
-                                <td class="px-4 py-3 text-right text-primary-900 dark:text-white">{{ number_format($detail->total_volume) }} cm3</td>
+                                <td class="px-4 py-3 text-right text-primary-900 dark:text-white">{{ number_format($detail->total_volume, 4) }} m3</td>
 
                </tr>
                         @endforeach

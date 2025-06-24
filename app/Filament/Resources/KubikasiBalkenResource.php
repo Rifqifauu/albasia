@@ -54,7 +54,7 @@ class KubikasiBalkenResource extends Resource
             MIN(tallies.id) as id,
             tallies.nomor_polisi, 
             DATE(tallies.created_at) as created_at, 
-            COALESCE(SUM(pallets.volume * filtered_costs.harga), 0) as total_tagihan
+            COALESCE(SUM(pallets.volume /1000000 * filtered_costs.harga), 0) as total_tagihan
         ')
         ->groupByRaw('tallies.nomor_polisi, DATE(tallies.created_at)')
         ->orderByRaw('DATE(tallies.created_at) asc, tallies.nomor_polisi asc');

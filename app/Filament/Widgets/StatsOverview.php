@@ -17,7 +17,7 @@ class StatsOverview extends BaseWidget
         return [
            Stat::make('Total Balken Hari Ini', number_format($balken) . ' pcs')
     ->descriptionIcon('heroicon-m-arrow-trending-up'),
-            Stat::make('Total Volume Hari Ini', number_format($volume, 2, ',', '.') . ' cm³')
+            Stat::make('Total Volume Hari Ini', number_format($volume/ 1000000, 2, ',', '.') . ' m³')
     ->descriptionIcon('heroicon-m-arrow-trending-up'),
             Stat::make('Total Tally Hari Ini', $tallies)
                 ->descriptionIcon('heroicon-m-arrow-trending-up'),

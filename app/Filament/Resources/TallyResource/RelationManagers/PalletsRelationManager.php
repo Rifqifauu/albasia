@@ -32,8 +32,9 @@ class PalletsRelationManager extends RelationManager
             TextColumn::make('tebal'),
             TextColumn::make('lebar'),
             TextColumn::make('panjang'),
-            TextColumn::make('volume'),
-            TextColumn::make('jumlah'),
+            TextColumn::make('volume')
+    ->formatStateUsing(fn ($state) => number_format($state / 1000000, 3) . ' m³'),
+            TextColumn::make(name: 'jumlah'),
         ])
         ->headerActions([
             Tables\Actions\CreateAction::make(),

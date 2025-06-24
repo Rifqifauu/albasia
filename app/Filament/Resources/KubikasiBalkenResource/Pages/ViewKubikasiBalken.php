@@ -51,7 +51,7 @@ $this->cost = Cost::where('tipe', 'balken')
             return (object) [
                 'grade' => strtoupper($grade),
                 'total_jumlah' => $data?->total_jumlah ?? 0,
-                'total_volume' => $data?->total_volume ?? 0,
+                'total_volume' => $data?->total_volume /1000000 ?? 0,
             ];
         });
 $this->total_tagihan = Pallets::join('tallies', 'pallets.tally_id', '=', 'tallies.id')
@@ -66,11 +66,11 @@ $this->total_tagihan = Pallets::join('tallies', 'pallets.tally_id', '=', 'tallie
     ->sum(function ($item) {
         $grade = strtoupper($item->grade);
         $harga = $this->cost[$grade]->harga ?? 0;
-        return $item->total_volume * $harga;
+        return $item->total_volume /1000000  * $harga;
     });
 
         $this->total_jumlah = $this->pallets->sum('total_jumlah');
-        $this->total_volume = $this->pallets->sum('total_volume');
+        $this->total_volume = $this->pallets->sum('total_volume') ;
     }
 
     // 👇 Gunakan accessor Livewire untuk data yang kompleks dan ingin paginasi
@@ -83,7 +83,7 @@ $this->total_tagihan = Pallets::join('tallies', 'pallets.tally_id', '=', 'tallie
                 pallets.lebar,
                 pallets.panjang,
                 SUM(pallets.jumlah) as total_jumlah,
-                SUM(pallets.volume) as total_volume
+                SUM(pallets.volume) /1000000 as total_volume
             ')
             ->where('tallies.nomor_polisi', $this->nomor_polisi)
             ->whereDate('tallies.created_at', $this->tanggal)

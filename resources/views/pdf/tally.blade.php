@@ -26,7 +26,8 @@
         <p><span style="font-weight: bold; display: inline-block; width: 150px;">Tally Man:</span> {{ $tally->tally_man }}</p>
         <p><span style="font-weight: bold; display: inline-block; width: 150px;">Nomor Polisi:</span> {{ $tally->nomor_polisi }}</p>
         <p><span style="font-weight: bold; display: inline-block; width: 150px;">Total Balken:</span> {{ $tally->total_balken }}</p>
-        <p><span style="font-weight: bold; display: inline-block; width: 150px;">Total Volume:</span> {{ $tally->total_volume }}</p>
+        <p><span style="font-weight: bold; display: inline-block; width: 150px;">Total Volume:</span>   {{ number_format($tally->total_volume / 1000000, 3) }} m³
+</p>
         <p><span style="font-weight: bold; display: inline-block; width: 150px;">Tanggal Dibuat:</span> {{ $tally->created_at->format('d M Y, H:i') }}</p>
     </div>
 </div>

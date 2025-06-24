@@ -113,10 +113,11 @@ class ViewTally extends ViewRecord
                                 ->badge()
                                 ->color('primary'),
                             
-                            TextEntry::make('total_volume')
-                                ->label('Total Volume')
-                                ->badge()
-                                ->color('success'),
+                          TextEntry::make('total_volume')
+    ->label('Total Volume')
+    ->badge()
+    ->color('success')
+    ->formatStateUsing(fn ($state) => number_format($state / 1000000, 3) . ' m³'),
                             TextEntry::make('status')
                                 ->label('Status')
                                 ->badge()
