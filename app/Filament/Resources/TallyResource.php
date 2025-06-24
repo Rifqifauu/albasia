@@ -42,6 +42,7 @@ class TallyResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+        
             ->columns([
                 TextColumn::make('no_register')
                     ->label('No Register')
@@ -58,34 +59,18 @@ class TallyResource extends Resource
                     ->label('Tanggal Tally')
                     ->dateTime('d M Y, H:i')
                     ->wrap()
+                    ->sortable()
                     ->searchable(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\ViewAction::make(),
-                  Action::make('unduh_pdf')
-        ->label('Unduh PDF')
-        ->icon('heroicon-o-arrow-down-tray')
-        ->color('success')
-        ->action(function ($record) {
-            $qrCode = (new QRCode(
-                new QROptions([
-                    'outputType' => QRCode::OUTPUT_IMAGE_PNG,
-                    'imageBase64' => true,
-                    'scale' => 8,
-                ])
-            ))->render($record->no_register);
-
-            $pdf = Pdf::loadView('pdf.tally', [
-                'tally' => $record,
-                'qrCode' => $qrCode,
-            ])->setPaper([0, 0, 298, 420], 'landscape') ;
-
-            return response()->streamDownload(
-                fn () => print($pdf->stream()),
-                'tally-' . $record->id . '.pdf'
-            );
-        }),
+                  Tables\Actions\Action::make('download_pdf')
+    ->label('Download PDF')
+    ->icon('heroicon-o-arrow-down-tray')
+    ->color('success')
+    ->url(fn ($record) => route('tally.download.pdf', $record)) // 👈 ganti jadi URL
+    ->openUrlInNewTab(),
             ])
             ->filters([
               // Filter berdasarkan tanggal
