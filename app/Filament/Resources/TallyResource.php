@@ -5,8 +5,9 @@ use Filament\Tables\Actions\Action;
 use Barryvdh\DomPDF\Facade\Pdf;
 use chillerlan\QRCode\QRCode;
 use chillerlan\QRCode\QROptions;
-
+use Illuminate\Database\Eloquent\Builder;
 use App\Models\Tallies;
+use Carbon\Carbon;
 use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms;
@@ -44,16 +45,20 @@ class TallyResource extends Resource
             ->columns([
                 TextColumn::make('no_register')
                     ->label('No Register')
+                    ->searchable()
                     ->wrap(),
                 TextColumn::make('nomor_polisi')
-                    ->label('Nomor Polisi'),
+                    ->label('Nomor Polisi')
+                    ->searchable(),
             
                 TextColumn::make('status')
-                    ->label('Status'),
+                    ->label('Status')
+                    ->searchable(),
                 TextColumn::make('created_at')
                     ->label('Tanggal Tally')
                     ->dateTime('d M Y, H:i')
-                    ->wrap(),
+                    ->wrap()
+                    ->searchable(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -83,15 +88,71 @@ class TallyResource extends Resource
         }),
             ])
             ->filters([
-            Filter::make('created_at')
-                ->form([
-                    DatePicker::make('tanggal'),
-                ])
-                ->query(function ($query, array $data) {
-                    return $query
-                        ->when($data['tanggal'], fn ($query, $date) => 
-                            $query->whereDate('created_at', $date));
-                }),
+              // Filter berdasarkan tanggal
+                Filter::make('tanggal_range')
+                    ->form([
+                        Grid::make(2)
+                            ->schema([
+                                DatePicker::make('tanggal_dari')
+                                    ->label('Tanggal Dari')
+                                    ->placeholder('Pilih tanggal mulai'),
+                                DatePicker::make('tanggal_sampai')
+                                    ->label('Tanggal Sampai')
+                                    ->placeholder('Pilih tanggal akhir'),
+                            ]),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['tanggal_dari'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('tallies.created_at', '>=', $date),
+                            )
+                            ->when(
+                                $data['tanggal_sampai'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('tallies.created_at', '<=', $date),
+                            );
+                    })
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+
+                        if ($data['tanggal_dari'] ?? null) {
+                            $indicators[] = 'Dari: ' . Carbon::parse($data['tanggal_dari'])->format('d/m/Y');
+                        }
+
+                        if ($data['tanggal_sampai'] ?? null) {
+                            $indicators[] = 'Sampai: ' . Carbon::parse($data['tanggal_sampai'])->format('d/m/Y');
+                        }
+
+                        return $indicators;
+                    }),
+                // Filter berdasarkan nomor polisi
+                Filter::make('nomor_polisi')
+                    ->form([
+                        Select::make('nomor_polisi_filter')
+                            ->label('Nomor Polisi')
+                            ->placeholder('Pilih nomor polisi')
+                            ->options(function () {
+                                return Tallies::select('nomor_polisi')
+                                    ->distinct()
+                                    ->orderBy('nomor_polisi')
+                                    ->pluck('nomor_polisi', 'nomor_polisi')
+                                    ->toArray();
+                            })
+                            ->searchable(),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            $data['nomor_polisi_filter'],
+                            fn (Builder $query, $nopol): Builder => $query->where('tallies.nomor_polisi', $nopol),
+                        );
+                    })
+                    ->indicateUsing(function (array $data): ?string {
+                        if ($data['nomor_polisi_filter'] ?? null) {
+                            return 'Nomor Polisi: ' . $data['nomor_polisi_filter'];
+                        }
+
+                        return null;
+                    })
         ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

@@ -16,4 +16,11 @@ class ListTallies extends ListRecords
             Actions\CreateAction::make(),
         ];
     }
+      protected function getHeaderWidgets(): array
+    {
+        return [
+    \App\Filament\Widgets\StatsOverview::class,
+];
+
+    }
 }

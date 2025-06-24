@@ -23,7 +23,7 @@ use Carbon\Carbon;
 class KubikasiBalkenResource extends Resource
 {
     protected static ?string $model = Tallies::class;
-protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 4;
     protected static ?string $navigationLabel = 'Kubikasi Balken';
     protected static ?string $navigationIcon = 'heroicon-o-queue-list';
 
@@ -38,29 +38,39 @@ protected static ?int $navigationSort = 4;
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(function (Builder $query) {
-                return $query
-                    ->selectRaw('
-                        MIN(id) as id,
-                        nomor_polisi, 
-                        DATE(created_at) as created_at, 
-                        SUM(total_balken) as total_balken, 
-                        SUM(total_volume) as total_volume
-                    ')
-                    ->groupByRaw('nomor_polisi, DATE(created_at)')
-                    ->orderByRaw('DATE(created_at) asc, nomor_polisi asc');
-            })
+          ->modifyQueryUsing(function (Builder $query) {
+    return $query
+        ->leftJoin('pallets', 'tallies.id', '=', 'pallets.tally_id')
+        ->leftJoinSub(
+            \DB::table('costs')
+                ->selectRaw('grade, harga')
+                ->where('tipe', 'balken'),
+            'filtered_costs',
+            function ($join) {
+                $join->on(\DB::raw('UPPER(pallets.grade)'), '=', 'filtered_costs.grade');
+            }
+        )
+        ->selectRaw('
+            MIN(tallies.id) as id,
+            tallies.nomor_polisi, 
+            DATE(tallies.created_at) as created_at, 
+            COALESCE(SUM(pallets.volume * filtered_costs.harga), 0) as total_tagihan
+        ')
+        ->groupByRaw('tallies.nomor_polisi, DATE(tallies.created_at)')
+        ->orderByRaw('DATE(tallies.created_at) asc, tallies.nomor_polisi asc');
+})
+
             ->columns([
                 TextColumn::make('created_at')
                     ->label('Tanggal Tally')
-                    ->date()
-                    ->searchable(),
+                    ->date(),
                 TextColumn::make('nomor_polisi')
-                    ->label('Nomor Polisi')
-                    ->searchable(),
-                TextColumn::make('total_balken')
-                    ->label('Total Balken')
-                    ->numeric(),
+                    ->label('Nomor Polisi'),
+               
+                TextColumn::make('total_tagihan')
+                    ->label('Total Tagihan')
+                    ->money('IDR')
+                    ->sortable(),
             ])
             ->filters([
                 // Filter berdasarkan tanggal
@@ -80,11 +90,11 @@ protected static ?int $navigationSort = 4;
                         return $query
                             ->when(
                                 $data['tanggal_dari'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                                fn (Builder $query, $date): Builder => $query->whereDate('tallies.created_at', '>=', $date),
                             )
                             ->when(
                                 $data['tanggal_sampai'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                                fn (Builder $query, $date): Builder => $query->whereDate('tallies.created_at', '<=', $date),
                             );
                     })
                     ->indicateUsing(function (array $data): array {
@@ -118,7 +128,7 @@ protected static ?int $navigationSort = 4;
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->when(
                             $data['nomor_polisi_filter'],
-                            fn (Builder $query, $nopol): Builder => $query->where('nomor_polisi', $nopol),
+                            fn (Builder $query, $nopol): Builder => $query->where('tallies.nomor_polisi', $nopol),
                         );
                     })
                     ->indicateUsing(function (array $data): ?string {
@@ -129,7 +139,7 @@ protected static ?int $navigationSort = 4;
                         return null;
                     }),
             ])
-            ->defaultSort(null)
+            ->defaultSort('total_tagihan', 'desc')
             ->actions([
                 Tables\Actions\Action::make('view')
                     ->label('Lihat Detail')

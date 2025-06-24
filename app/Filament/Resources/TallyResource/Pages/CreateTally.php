@@ -24,15 +24,15 @@ class CreateTally extends CreateRecord
             ])->schema([
                 TextInput::make('no_register')
                     ->label('No Register')
-                    ->required(),
+                    ,
 
                 TextInput::make('tally_man')
                     ->label('Tally Man')
-                    ->required(),
+                    ,
 
                 TextInput::make('nomor_polisi')
                     ->label('Nomor Polisi')
-                    ->required(),
+                    ,
 
                 Select::make('status')
                     ->label('Status')
@@ -40,19 +40,23 @@ class CreateTally extends CreateRecord
                         'basah' => 'Basah',
                         'kering' => 'Kering',
                     ])
-                    ->required(),
+                   
+                    ->placeholder('Pilih Status')
+                    ,
 
                 TextInput::make('total_volume')
                     ->label('Total Volume')
                     ->numeric()
                     ->disabled()
-                    ->dehydrated(),
+                    ->dehydrated()
+                    ->default(0), // Add default value
 
                 TextInput::make('total_balken')
                     ->label('Total Balken')
                     ->numeric()
                     ->disabled()
-                    ->dehydrated(),
+                    ->dehydrated()
+                    ->default(0), // Add default value
             ]),
 
             HasManyRepeater::make('pallet')
@@ -64,11 +68,6 @@ class CreateTally extends CreateRecord
                         'default' => 2,
                         'md' => 4,
                     ])->schema([
-                        TextInput::make('nomor_pallet')
-                            ->label('Nomor Pallet')
-                            ->hidden()
-                            ->dehydrated(),
-
                         Select::make('grade')
                             ->options([
                                 'kotak' => 'KOTAK',
@@ -77,7 +76,8 @@ class CreateTally extends CreateRecord
                                 'allgrade' => 'ALL GRADE',
                                 'afkir' => 'AFKIR',
                             ])
-                            ->required()
+                            ->placeholder('Pilih Grade')
+                            
                             ->columnSpan([
                                 'default' => 2,
                                 'md' => 1,
@@ -86,57 +86,45 @@ class CreateTally extends CreateRecord
                         TextInput::make('tebal')
                             ->label('Tebal')
                             ->numeric()
+                           
                             ->reactive()
                             ->debounce(500)
                             ->afterStateUpdated(function ($state, callable $get, callable $set) {
-                                $lebar = $get('lebar');
-                                $panjang = $get('panjang');
-                                $jumlah = $get('jumlah');
-                                if ($state && $lebar && $panjang && $jumlah) {
-                                    $set('volume', $state * $lebar * $panjang * $jumlah);
-                                }
+                                $this->calculateVolume($state, $get, $set);
+                                $this->updateTotals($get, $set);
                             }),
 
                         TextInput::make('lebar')
                             ->label('Lebar')
                             ->numeric()
+                           
                             ->reactive()
                             ->debounce(500)
                             ->afterStateUpdated(function ($state, callable $get, callable $set) {
-                                $tebal = $get('tebal');
-                                $panjang = $get('panjang');
-                                $jumlah = $get('jumlah');
-                                if ($tebal && $panjang && $state && $jumlah) {
-                                    $set('volume', $tebal * $panjang * $state * $jumlah);
-                                }
+                                $this->calculateVolume($state, $get, $set);
+                                $this->updateTotals($get, $set);
                             }),
 
                         TextInput::make('panjang')
                             ->label('Panjang')
                             ->numeric()
+                            
                             ->reactive()
                             ->debounce(500)
                             ->afterStateUpdated(function ($state, callable $get, callable $set) {
-                                $tebal = $get('tebal');
-                                $lebar = $get('lebar');
-                                $jumlah = $get('jumlah');
-                                if ($tebal && $lebar && $state && $jumlah) {
-                                    $set('volume', $tebal * $lebar * $state * $jumlah);
-                                }
+                                $this->calculateVolume($state, $get, $set);
+                                $this->updateTotals($get, $set);
                             }),
 
                         TextInput::make('jumlah')
                             ->label('Jumlah')
                             ->numeric()
+                           
                             ->reactive()
                             ->debounce(500)
                             ->afterStateUpdated(function ($state, callable $get, callable $set) {
-                                $tebal = $get('tebal');
-                                $lebar = $get('lebar');
-                                $panjang = $get('panjang');
-                                if ($tebal && $lebar && $panjang && $state) {
-                                    $set('volume', $tebal * $lebar * $panjang * $state);
-                                }
+                                $this->calculateVolume($state, $get, $set);
+                                $this->updateTotals($get, $set);
                             }),
 
                         TextInput::make('volume')
@@ -144,6 +132,7 @@ class CreateTally extends CreateRecord
                             ->numeric()
                             ->disabled()
                             ->dehydrated()
+                            ->default(0) // Add default value
                             ->columnSpan([
                                 'default' => 2,
                                 'md' => 1,
@@ -155,30 +144,72 @@ class CreateTally extends CreateRecord
                 ->collapsible()
                 ->collapsed()
                 ->columnSpanFull()
-                ->itemLabel(fn (array $state): ?string => $state['nomor_pallet'] ?? 'Pallet'),
+                ->itemLabel('Pallet'),
         ]);
     }
-protected function fillForm(): void
-{
-    parent::fillForm();
 
-    // Hapus value `volume` agar tidak tampil dari database
-    $state = $this->form->getState();
+    protected function fillForm(): void
+    {
+        parent::fillForm();
 
-    if (isset($state['pallet']) && is_array($state['pallet'])) {
-        foreach ($state['pallet'] as $i => &$item) {
-            $item['volume'] = null;
+        // Hapus value `volume` agar tidak tampil dari database
+        $state = $this->form->getState();
+
+        if (isset($state['pallet']) && is_array($state['pallet'])) {
+            foreach ($state['pallet'] as $i => &$item) {
+                $item['volume'] = null;
+            }
+            $this->form->fill(array_merge($state, [
+                'pallet' => $state['pallet'],
+            ]));
         }
-        $this->form->fill(array_merge($state, [
-            'pallet' => $state['pallet'],
-        ]));
     }
-}
+
+    // Helper method to calculate volume for individual pallet
+    private function calculateVolume($state, callable $get, callable $set): void
+    {
+        $tebal = floatval($get('tebal') ?? 0);
+        $lebar = floatval($get('lebar') ?? 0);
+        $panjang = floatval($get('panjang') ?? 0);
+        $jumlah = intval($get('jumlah') ?? 0);
+        
+        if ($tebal && $lebar && $panjang && $jumlah) {
+            $volume = $tebal * $lebar * $panjang * $jumlah;
+            $set('volume', $volume);
+        }
+    }
+
+    // Helper method to update totals
+    private function updateTotals(callable $get, callable $set): void
+    {
+        $palletData = $get('../../pallet') ?? [];
+        $totalVolume = 0;
+        $totalBalken = 0;
+
+        foreach ($palletData as $pallet) {
+            $volume = floatval($pallet['volume'] ?? 0);
+            $jumlah = intval($pallet['jumlah'] ?? 0);
+            
+            $totalVolume += $volume;
+            $totalBalken += $jumlah;
+        }
+
+        $set('../../total_volume', $totalVolume);
+        $set('../../total_balken', $totalBalken);
+    }
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $totalVolume = 0;
         $totalBalken = 0;
+
+        // Ensure we have default values
+        if (!isset($data['total_volume'])) {
+            $data['total_volume'] = 0;
+        }
+        if (!isset($data['total_balken'])) {
+            $data['total_balken'] = 0;
+        }
 
         if (!isset($data['pallet']) || !is_array($data['pallet'])) {
             $data['total_volume'] = 0;
@@ -187,6 +218,7 @@ protected function fillForm(): void
         }
 
         foreach ($data['pallet'] as $index => &$pallet) {
+            // Clean up unwanted fields
             unset($pallet['id'], $pallet['created_at'], $pallet['updated_at'], $pallet['tally_id']);
 
             $tebal = floatval($pallet['tebal'] ?? 0);
@@ -196,7 +228,6 @@ protected function fillForm(): void
 
             $volume = $tebal * $lebar * $panjang * $jumlah;
             $pallet['volume'] = $volume;
-            $pallet['nomor_pallet'] = (string)($index + 1);
 
             $totalVolume += $volume;
             $totalBalken += $jumlah;
@@ -206,5 +237,11 @@ protected function fillForm(): void
         $data['total_balken'] = $totalBalken;
 
         return $data;
+    }
+
+    protected function afterSave(): void
+    {
+        // Redirect ke halaman Create ini sendiri untuk merefresh form dan menampilkan data terbaru
+        $this->redirect(static::getUrl(['record' => $this->record->getKey()]));
     }
 }
