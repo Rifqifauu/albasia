@@ -50,6 +50,7 @@ public function getTableQuery(): Builder
 {
     return $this->getRelationship()
         ->getQuery()
+->orderBy('grade', 'asc')
         ->orderByDesc('tebal')
         ->orderByDesc('lebar')
         ->orderByDesc('panjang');

@@ -24,6 +24,10 @@ class CreateTally extends CreateRecord
             ])->schema([
                 TextInput::make('no_register')
                     ->label('No Register')
+                        ->unique(ignoreRecord: true)
+                         ->validationMessages([
+        'unique' => 'Kode Register sudah pernah digunakan.',
+    ])
                     ,
 
                 TextInput::make('tally_man')
@@ -59,10 +63,58 @@ class CreateTally extends CreateRecord
                     ->default(0), // Add default value
             ]),
 
-            HasManyRepeater::make('pallet')
+     Grid::make([
+                'default' => 2,
+                'md' => 4,
+            ])->schema([
+                 Select::make('grade_default')
+    ->label('Grade Default')
+    ->options([
+        'kotak' => 'KOTAK',
+        'ds4' => 'DS 4',
+        'ongrade' => 'ON GRADE',
+        'allgrade' => 'ALL GRADE',
+        'afkir' => 'AFKIR',
+    ])
+    ->reactive(),
+TextInput::make('tebal_default')
+    ->label('Tebal Default')
+    ->numeric()
+    ->reactive(),
+TextInput::make('panjang_default')
+    ->label('Panjang Default')
+    ->numeric()
+    ->reactive(),
+    TextInput::make('jumlah_pallet')
+    ->label('Jumlah Pallet')
+    ->numeric()
+    ->default(1)
+    ->reactive()
+    ->afterStateUpdated(function ($state, callable $set, callable $get) {
+        $jumlah = intval($state);
+
+        $grade = $get('grade_default');
+        $tebal = $get('tebal_default');
+        $panjang = $get('panjang_default');
+
+        if ($jumlah > 0 && $jumlah <= 100 && $grade && $tebal) {
+            $pallets = collect(range(1, $jumlah))->map(fn () => [
+                'grade' => $grade,
+                'tebal' => $tebal,
+                'lebar' => null,
+                'panjang' => $panjang,
+                'jumlah' => null,
+                'volume' => 0,
+            ])->toArray();
+
+            $set('pallet', $pallets);
+        }
+    }),   
+]),         HasManyRepeater::make('pallet')
                 ->relationship('pallet')
                 ->label('Data Pallet')
                 ->dehydrated()
+                
                 ->schema([
                     Grid::make([
                         'default' => 2,
@@ -144,7 +196,8 @@ class CreateTally extends CreateRecord
                 ->collapsible()
                 ->collapsed()
                 ->columnSpanFull()
-                ->itemLabel('Pallet'),
+                ->itemLabel('Pallet')
+                ,
         ]);
     }
 

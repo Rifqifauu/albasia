@@ -7,7 +7,7 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 use App\Models\Tallies;
 use Carbon\Carbon;
 
-class StatsOverview extends BaseWidget
+class TallyOverview extends BaseWidget
 {
     protected function getStats(): array
     {
