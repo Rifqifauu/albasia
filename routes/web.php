@@ -8,6 +8,7 @@ Route::get('/payrolls/{record}/download-pdf', [PdfController::class, 'payroll'])
 Route::get('/tallies/{record}/download-pdf', [PdfController::class, 'tally'])
     ->name('tally.download.pdf');
 
+
 Route::get('/', function () {
     return redirect('/admin');
 });

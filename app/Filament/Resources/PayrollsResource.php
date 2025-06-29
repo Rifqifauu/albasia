@@ -16,6 +16,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
+use \ZipArchive;
 
 class PayrollsResource extends Resource
 {
@@ -119,8 +120,30 @@ protected static ?int $navigationSort = 3;
 
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                ]),
+                Tables\Actions\BulkAction::make('download_zip')
+                    ->label('Download ZIP PDF')
+                    ->requiresConfirmation()
+                    ->action(function ($records) {
+                         $zip = new ZipArchive();
+        $fileName = 'PayrollPDF_' . now()->format('Ymd_His') . '.zip';
+        $filePath = storage_path("app/{$fileName}");
+                        if ($zip->open($filePath, ZipArchive::CREATE | ZipArchive::OVERWRITE)) {
+            foreach ($records as $record) {
+               
+
+                 $pdf = Pdf::loadView('pdf.payroll', [
+            'record' => $record,
+        ])->setPaper('a4', 'landscape');
+
+
+                $safeName = 'Payroll-' . preg_replace('/[^a-zA-Z0-9-_]/', '_', $record->employee->nama) . '.pdf';
+
+                $zip->addFromString($safeName, $pdf->output());
+            }
+
+            $zip->close();
+        } return response()->download($filePath)->deleteFileAfterSend(true);
+    })
             ]);
     }
 

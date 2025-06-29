@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 use Filament\Tables\Actions\Action;
 use Barryvdh\DomPDF\Facade\Pdf;
+use ZipArchive;
 use chillerlan\QRCode\QRCode;
 use chillerlan\QRCode\QROptions;
 use Illuminate\Database\Eloquent\Builder;
@@ -140,8 +141,41 @@ class TallyResource extends Resource
                     })
         ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                ]),
+                
+Tables\Actions\BulkAction::make('download_zip')
+    ->label('Download ZIP PDF')
+    ->requiresConfirmation()
+    ->color('success')
+    ->action(function ($records) {
+        $zip = new ZipArchive();
+        $fileName = 'TallyPDFs_' . now()->format('Ymd_His') . '.zip';
+        $filePath = storage_path("app/{$fileName}");
+
+        if ($zip->open($filePath, ZipArchive::CREATE | ZipArchive::OVERWRITE)) {
+            foreach ($records as $record) {
+                $qrCode = (new QRCode(
+                    new QROptions([
+                        'outputType' => QRCode::OUTPUT_IMAGE_PNG,
+                        'imageBase64' => true,
+                        'scale' => 8,
+                    ])
+                ))->render($record->no_register);
+
+                $pdf = Pdf::loadView('pdf.tally', [
+                    'tally' => $record,
+                    'qrCode' => $qrCode,
+                ])->setPaper([0, 0, 298, 40], 'landscape');
+
+                $safeName = 'Tally-' . preg_replace('/[^a-zA-Z0-9-_]/', '_', $record->no_register) . '.pdf';
+
+                $zip->addFromString($safeName, $pdf->output());
+            }
+
+            $zip->close();
+        }
+
+        return response()->download($filePath)->deleteFileAfterSend(true);
+    })
             ]);
     }
     

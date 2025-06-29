@@ -9,6 +9,8 @@ use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Pages;
 use Filament\Panel;
+use App\Filament\Widgets\TallyOverview;
+use App\Filament\Widgets\TotalBalken;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Althinect\FilamentSpatieRolesPermissions\FilamentSpatieRolesPermissionsPlugin;
@@ -43,7 +45,8 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                
+                TallyOverview::class,
+                TotalBalken::class,
             ])
             ->middleware([
                 EncryptCookies::class,

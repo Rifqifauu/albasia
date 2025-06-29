@@ -33,7 +33,7 @@ class PdfController extends Controller
         $pdf = Pdf::loadView('pdf.tally', [
             'tally' => $record,
             'qrCode' => $qrCode,
-        ])->setPaper([0, 0, 298, 420], 'landscape'); // slip custom mm
+        ])->setPaper([0, 0, 298, 430], 'landscape'); // slip custom mm
 
         $filename = 'Tally-' . preg_replace('/[^a-zA-Z0-9-_]/', '_', $record->no_register) . '.pdf';
 
