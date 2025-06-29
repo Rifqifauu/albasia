@@ -41,7 +41,7 @@ class ListAttendances extends ListRecords
 
                         foreach ($csv->getRecords() as $record) {
                             Attendance::create([
-                                'employee_id' => $record['employee_id'],
+                                'nik' => $record['nik'],
                                 'tanggal'     => $record['tanggal'],
                                 'masuk'       => $record['masuk'],
                                 'keluar'      => $record['keluar'],

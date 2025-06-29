@@ -4,7 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\KubikasiBalkenResource\Pages;
 use App\Filament\Resources\KubikasiBalkenResource\RelationManagers;
-use App\Models\Tallies;
+use App\Models\KubikasiBalken;
 use App\Models\Pallets;
 use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\DatePicker;
@@ -20,9 +20,14 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Carbon\Carbon;
 
+
+
+    
+
+
 class KubikasiBalkenResource extends Resource
 {
-    protected static ?string $model = Tallies::class;
+    protected static ?string $model = KubikasiBalken::class;
     protected static ?int $navigationSort = 4;
     protected static ?string $navigationLabel = 'Kubikasi Balken';
     protected static ?string $navigationIcon = 'heroicon-o-queue-list';
@@ -34,32 +39,10 @@ class KubikasiBalkenResource extends Resource
                 //
             ]);
     }
-
     public static function table(Table $table): Table
     {
         return $table
-          ->modifyQueryUsing(function (Builder $query) {
-    return $query
-        ->leftJoin('pallets', 'tallies.id', '=', 'pallets.tally_id')
-        ->leftJoinSub(
-            \DB::table('costs')
-                ->selectRaw('grade, harga')
-                ->where('tipe', 'balken'),
-            'filtered_costs',
-            function ($join) {
-                $join->on(\DB::raw('UPPER(pallets.grade)'), '=', 'filtered_costs.grade');
-            }
-        )
-        ->selectRaw('
-            MIN(tallies.id) as id,
-            tallies.nomor_polisi, 
-            DATE(tallies.created_at) as created_at, 
-            COALESCE(SUM(pallets.volume /1000000 * filtered_costs.harga), 0) as total_tagihan
-        ')
-        ->groupByRaw('tallies.nomor_polisi, DATE(tallies.created_at)')
-        ->orderByRaw('DATE(tallies.created_at) asc, tallies.nomor_polisi asc');
-})
-
+->modifyQueryUsing(fn () => KubikasiBalken::queryWithTotalTagihan())
             ->columns([
                 TextColumn::make('created_at')
                     ->label('Tanggal Tally')
@@ -117,7 +100,7 @@ class KubikasiBalkenResource extends Resource
                             ->label('Nomor Polisi')
                             ->placeholder('Pilih nomor polisi')
                             ->options(function () {
-                                return Tallies::select('nomor_polisi')
+                                return KubikasiBalken::select('nomor_polisi')
                                     ->distinct()
                                     ->orderBy('nomor_polisi')
                                     ->pluck('nomor_polisi', 'nomor_polisi')

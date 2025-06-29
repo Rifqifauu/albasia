@@ -19,7 +19,7 @@ class ListTallies extends ListRecords
       protected function getHeaderWidgets(): array
     {
         return [
-    \App\Filament\Widgets\StatsOverview::class,
+    \App\Filament\Widgets\TallyOverview::class,
 ];
 
     }

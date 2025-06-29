@@ -24,6 +24,10 @@ class CreateTally extends CreateRecord
             ])->schema([
                 TextInput::make('no_register')
                     ->label('No Register')
+                        ->unique(ignoreRecord: true)
+                         ->validationMessages([
+        'unique' => 'Kode Register sudah pernah digunakan.',
+    ])
                     ,
 
                 TextInput::make('tally_man')
