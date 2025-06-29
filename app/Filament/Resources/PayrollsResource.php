@@ -122,6 +122,7 @@ protected static ?int $navigationSort = 3;
             ->bulkActions([
                 Tables\Actions\BulkAction::make('download_zip')
                     ->label('Download ZIP PDF')
+                    ->color('success')
                     ->requiresConfirmation()
                     ->action(function ($records) {
                          $zip = new ZipArchive();

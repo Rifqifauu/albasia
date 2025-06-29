@@ -3,13 +3,13 @@
 namespace App\Filament\Widgets;
 
 use Filament\Widgets\ChartWidget;
-use App\Models\Pallets;
+use App\Models\Tallies;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
-class TotalBalken extends ChartWidget
+class TotalTally extends ChartWidget
 {
-    protected static ?string $heading = 'Total Balken';
+    protected static ?string $heading = 'Total Tally';
     protected static ?int $sort = 1;
 
     protected function getFilters(): ?array
@@ -27,11 +27,11 @@ class TotalBalken extends ChartWidget
         switch ($filter) {
             case 'harian':
                 $startDate = Carbon::today()->subDays(6);
-                $data = Pallets::selectRaw('DATE(created_at) as label, SUM(jumlah) as total')
+                $data = Tallies::selectRaw('DATE(created_at) as date, COUNT(*) as total')
                     ->whereDate('created_at', '>=', $startDate)
-                    ->groupBy('label')
-                    ->orderBy('label')
-                    ->pluck('total', 'label')
+                    ->groupBy('date')
+                    ->orderBy('date')
+                    ->pluck('total', 'date')
                     ->toArray();
 
                 $labels = [];
@@ -42,9 +42,10 @@ class TotalBalken extends ChartWidget
                     $values[] = $data[$date] ?? 0;
                 }
                 break;
+
             default: // bulanan
                 $startMonth = Carbon::now()->subMonths(11)->startOfMonth();
-                $data = Pallets::selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, SUM(jumlah) as total')
+                $data = Tallies::selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, COUNT(*) as total')
                     ->whereDate('created_at', '>=', $startMonth)
                     ->groupBy('month')
                     ->orderBy('month')
@@ -64,7 +65,7 @@ class TotalBalken extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => 'Total Balken',
+                    'label' => 'Total Tally',
                     'data' => $values,
                 ],
             ],
@@ -79,6 +80,6 @@ class TotalBalken extends ChartWidget
 
     protected function getType(): string
     {
-        return 'line'; 
+        return 'line';
     }
 }
