@@ -164,7 +164,7 @@ Tables\Actions\BulkAction::make('download_zip')
                 $pdf = Pdf::loadView('pdf.tally', [
                     'tally' => $record,
                     'qrCode' => $qrCode,
-                ])->setPaper([0, 0, 298, 40], 'landscape');
+                ])->setPaper([0, 0, 298, 430], 'landscape');
 
                 $safeName = 'Tally-' . preg_replace('/[^a-zA-Z0-9-_]/', '_', $record->no_register) . '.pdf';
 

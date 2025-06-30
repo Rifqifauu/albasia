@@ -14,10 +14,11 @@ class TotalBalken extends ChartWidget
 
     protected function getFilters(): ?array
     {
-        return [
-            'harian' => 'Per Hari (7 Hari Terakhir)',
-            'bulanan' => 'Per Bulan (12 Bulan Terakhir)',
-        ];
+       return [
+    'bulanan' => 'Per Bulan (12 Bulan Terakhir)',
+    'harian' => 'Per Hari (7 Hari Terakhir)',
+];
+
     }
 
     protected function getData(): array
