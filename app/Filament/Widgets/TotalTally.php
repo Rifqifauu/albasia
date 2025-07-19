@@ -3,7 +3,7 @@
 namespace App\Filament\Widgets;
 
 use Filament\Widgets\ChartWidget;
-use App\Models\Tallies;
+use App\Models\TallyBalken;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -28,7 +28,7 @@ class TotalTally extends ChartWidget
         switch ($filter) {
             case 'harian':
                 $startDate = Carbon::today()->subDays(6);
-                $data = Tallies::selectRaw('DATE(created_at) as date, COUNT(*) as total')
+                $data = TallyBalken::selectRaw('DATE(created_at) as date, COUNT(*) as total')
                     ->whereDate('created_at', '>=', $startDate)
                     ->groupBy('date')
                     ->orderBy('date')
@@ -46,7 +46,7 @@ class TotalTally extends ChartWidget
 
             default: // bulanan
                 $startMonth = Carbon::now()->subMonths(11)->startOfMonth();
-                $data = Tallies::selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, COUNT(*) as total')
+                $data = TallyBalken::selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, COUNT(*) as total')
                     ->whereDate('created_at', '>=', $startMonth)
                     ->groupBy('month')
                     ->orderBy('month')

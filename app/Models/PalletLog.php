@@ -4,19 +4,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Pallets extends Model
+class PalletLog extends Model
 {
-    protected $fillable = [
-        'tebal',
+protected $fillable = [
+    'tebal',
     'lebar',
     'panjang',
     'volume',
     'jumlah',
     'grade',
-    
+
     ];
+    protected $table = 'pallet_log';
     //
     public function tally(){
-        return $this->belongsTo(Tallies::class, 'tally_id');
-    }
-}
+        return $this->belongsTo(TallyLog::class, 'tally_id');
+    }}

@@ -45,7 +45,7 @@ public function mount(): void
 
 public function getDetailPalletsProperty()
 {
-    return KubikasiBalken::detailPallets($this->nomor_polisi, $this->tanggal);
+    return KubikasiBalken::detailpallet_balken($this->nomor_polisi, $this->tanggal);
 }
 
     public static function getRoute(): string

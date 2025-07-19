@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\TallyResource\RelationManagers;
+namespace App\Filament\Resources\TallyBalkenResource\RelationManagers;
 
 use Filament\Forms;
 use Filament\Tables;
@@ -11,7 +11,7 @@ use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
 
 
-class PalletsRelationManager extends RelationManager
+class PalletBalkenRelationManager extends RelationManager
 {
     protected static string $relationship = 'pallet';
 

@@ -4,7 +4,7 @@ namespace App\Filament\Widgets;
 
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
-use App\Models\Tallies;
+use App\Models\TallyBalken;
 use Carbon\Carbon;
 
 class TallyOverview extends BaseWidget
@@ -13,7 +13,7 @@ class TallyOverview extends BaseWidget
 {
     $today = Carbon::today();
     $yesterday = Carbon::yesterday();
-    
+
     // Helper function untuk menghitung stats comparison
    $calculateComparison = function($today, $yesterday, $unit = '') {
     // Dibulatkan untuk keperluan logika juga
@@ -54,38 +54,38 @@ class TallyOverview extends BaseWidget
     }
 };
 
-    
-    
+
+
     // Balken
-    $balkenToday = Tallies::whereDate('created_at', $today)->sum('total_balken');
-    $balkenYesterday = Tallies::whereDate('created_at', $yesterday)->sum('total_balken');
+    $balkenToday = TallyBalken::whereDate('created_at', $today)->sum('total_balken');
+    $balkenYesterday = TallyBalken::whereDate('created_at', $yesterday)->sum('total_balken');
     $balkenStats = $calculateComparison($balkenToday, $balkenYesterday, 'pcs');
-    
+
     // Volume (dibagi langsung)
-$volumeToday = Tallies::whereDate('created_at', $today)->sum('total_volume') / 1000000;
-$volumeYesterday = Tallies::whereDate('created_at', $yesterday)->sum('total_volume') / 1000000;
+$volumeToday = TallyBalken::whereDate('created_at', $today)->sum('total_volume') / 1000000;
+$volumeYesterday = TallyBalken::whereDate('created_at', $yesterday)->sum('total_volume') / 1000000;
 
 // Gunakan hasil yang sudah dibagi untuk compare
 $volumeStats = $calculateComparison($volumeToday, $volumeYesterday, 'm³');
 
 
-    
-    // Tallies
-    $tallyToday = Tallies::whereDate('created_at', $today)->count();
-    $tallyYesterday = Tallies::whereDate('created_at', $yesterday)->count();
+
+    // TallyBalken
+    $tallyToday = TallyBalken::whereDate('created_at', $today)->count();
+    $tallyYesterday = TallyBalken::whereDate('created_at', $yesterday)->count();
     $tallyStats = $calculateComparison($tallyToday, $tallyYesterday, 'tally');
-    
+
     return [
         Stat::make('Total Balken Hari Ini', number_format($balkenToday) . ' pcs')
             ->description($balkenStats['desc'])
             ->descriptionIcon($balkenStats['icon'])
             ->color($balkenStats['color']),
-            
+
         Stat::make('Total Volume Hari Ini', number_format($volumeToday , 2, ',', '.') . ' m³')
             ->description($volumeStats['desc'])
             ->descriptionIcon($volumeStats['icon'])
             ->color($volumeStats['color']),
-            
+
         Stat::make('Total Tally Hari Ini', $tallyToday)
             ->description($tallyStats['desc'])
             ->descriptionIcon($tallyStats['icon'])

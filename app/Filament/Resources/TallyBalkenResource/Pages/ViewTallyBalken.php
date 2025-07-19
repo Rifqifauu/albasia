@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\TallyResource\Pages;
+namespace App\Filament\Resources\TallyBalkenResource\Pages;
 
-use App\Filament\Resources\TallyResource;
+use App\Filament\Resources\TallyBalkenResource;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Infolist;
 use Filament\Actions\Action;
@@ -14,16 +14,16 @@ use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\Grid;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\Section;
-use App\Filament\Resources\TallyResource\RelationManagers\PalletsRelationManager;
+use App\Filament\Resources\TallyBalkenResource\RelationManagers\PalletBalkenRelationManager;
 
-class ViewTally extends ViewRecord
+class ViewTallyBalken extends ViewRecord
 {
-    protected static string $resource = TallyResource::class;
+    protected static string $resource = TallyBalkenResource::class;
 
     public function getRelationManagers(): array
     {
         return [
-            PalletsRelationManager::class,
+            PalletBalkenRelationManager::class,
         ];
     }
 
@@ -102,17 +102,17 @@ class ViewTally extends ViewRecord
                                 ->label('Tally Man')
                                 ->weight('bold')
                                 ->size('sm'),
-                            
+
                             TextEntry::make('nomor_polisi')
                                 ->label('Nomor Polisi')
                                 ->weight('bold')
                                 ->size('sm'),
-                            
+
                             TextEntry::make('total_balken')
                                 ->label('Total Balken')
                                 ->badge()
                                 ->color('primary'),
-                            
+
                           TextEntry::make('total_volume')
     ->label('Total Volume')
     ->badge()
@@ -122,7 +122,7 @@ class ViewTally extends ViewRecord
                                 ->label('Status')
                                 ->badge()
                                 ->color('info'),
-                            
+
                             TextEntry::make('created_at')
                                 ->label('Tanggal Dibuat')
                                 ->dateTime('d M Y, H:i')

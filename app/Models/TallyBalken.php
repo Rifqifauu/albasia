@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Tallies extends Model
+class TallyBalken extends Model
 {
     protected $fillable =  [
         'no_register',
@@ -13,10 +13,12 @@ class Tallies extends Model
         'nomor_polisi',
         'tally_man',
         'status',
+        'kiln_dries_id',
     ];
 
+    protected $table = 'tally_balken';
     public function pallet(){
-        return $this->hasMany(Pallets::class,'tally_id');
+        return $this->hasMany(PalletBalken::class,'tally_id');
     }
     public function kilndry(){
         return $this->belongsTo(KilnDry::class);

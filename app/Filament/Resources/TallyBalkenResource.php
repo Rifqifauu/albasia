@@ -7,13 +7,13 @@ use ZipArchive;
 use chillerlan\QRCode\QRCode;
 use chillerlan\QRCode\QROptions;
 use Illuminate\Database\Eloquent\Builder;
-use App\Models\Tallies;
+use App\Models\TallyBalken;
 use Carbon\Carbon;
 use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms;
 use Filament\Forms\Form;
-use App\Filament\Resources\TallyResource\RelationManagers\PalletsRelationManager;
+use App\Filament\Resources\TallyBalkenResource\RelationManagers\PalletsRelationManager;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -25,14 +25,14 @@ use Filament\Forms\Components\HasManyRepeater;
 
 use Filament\Tables\Columns\TextColumn;
 
-use App\Filament\Resources\TallyResource\Pages;
+use App\Filament\Resources\TallyBalkenResource\Pages;
 
-class TallyResource extends Resource
+class TallyBalkenResource extends Resource
 {
-    protected static ?string $model = Tallies::class;
+    protected static ?string $model = TallyBalken::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
-    protected static ?string $navigationLabel = 'Daftar Tally';
+    protected static ?string $navigationLabel = 'Tally Balken';
 
     public static function form(Form $form): Form
 {
@@ -52,7 +52,7 @@ class TallyResource extends Resource
                 TextColumn::make('nomor_polisi')
                     ->label('Nomor Polisi')
                     ->searchable(),
-            
+
                 TextColumn::make('status')
                     ->label('Status')
                     ->searchable(),
@@ -91,11 +91,11 @@ class TallyResource extends Resource
                         return $query
                             ->when(
                                 $data['tanggal_dari'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('tallies.created_at', '>=', $date),
+                                fn (Builder $query, $date): Builder => $query->whereDate('tally_balken.created_at', '>=', $date),
                             )
                             ->when(
                                 $data['tanggal_sampai'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('tallies.created_at', '<=', $date),
+                                fn (Builder $query, $date): Builder => $query->whereDate('tally_balken.created_at', '<=', $date),
                             );
                     })
                     ->indicateUsing(function (array $data): array {
@@ -118,7 +118,7 @@ class TallyResource extends Resource
                             ->label('Nomor Polisi')
                             ->placeholder('Pilih nomor polisi')
                             ->options(function () {
-                                return Tallies::select('nomor_polisi')
+                                return TallyBalken::select('nomor_polisi')
                                     ->distinct()
                                     ->orderBy('nomor_polisi')
                                     ->pluck('nomor_polisi', 'nomor_polisi')
@@ -129,7 +129,7 @@ class TallyResource extends Resource
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->when(
                             $data['nomor_polisi_filter'],
-                            fn (Builder $query, $nopol): Builder => $query->where('tallies.nomor_polisi', $nopol),
+                            fn (Builder $query, $nopol): Builder => $query->where('tally_balken.nomor_polisi', $nopol),
                         );
                     })
                     ->indicateUsing(function (array $data): ?string {
@@ -141,7 +141,7 @@ class TallyResource extends Resource
                     })
         ])
             ->bulkActions([
-                
+
 Tables\Actions\BulkAction::make('download_zip')
     ->label('Download ZIP PDF')
     ->requiresConfirmation()
@@ -178,7 +178,7 @@ Tables\Actions\BulkAction::make('download_zip')
     })
             ]);
     }
-    
+
     public static function getPluralLabel(): ?string
     {
         return 'Tally';
@@ -186,10 +186,10 @@ Tables\Actions\BulkAction::make('download_zip')
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListTallies::route('/'),
-            'create' => Pages\CreateTally::route('/create'),
-            'edit' => Pages\EditTally::route('/{record}/edit'),
-            'view' => Pages\ViewTally::route('/{record}/view'),
+            'index' => Pages\ListTallyBalken::route('/'),
+            'create' => Pages\CreateTallyBalken::route('/create'),
+            'edit' => Pages\EditTallyBalken::route('/{record}/edit'),
+            'view' => Pages\ViewTallyBalken::route('/{record}/view'),
         ];
     }
 }

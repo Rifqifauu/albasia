@@ -3,7 +3,7 @@
 namespace App\Filament\Widgets;
 
 use Filament\Widgets\ChartWidget;
-use App\Models\Pallets;
+use App\Models\PalletBalken;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -28,7 +28,7 @@ class TotalBalken extends ChartWidget
         switch ($filter) {
             case 'harian':
                 $startDate = Carbon::today()->subDays(6);
-                $data = Pallets::selectRaw('DATE(created_at) as label, SUM(jumlah) as total')
+                $data = PalletBalken::selectRaw('DATE(created_at) as label, SUM(jumlah) as total')
                     ->whereDate('created_at', '>=', $startDate)
                     ->groupBy('label')
                     ->orderBy('label')
@@ -45,7 +45,7 @@ class TotalBalken extends ChartWidget
                 break;
             default: // bulanan
                 $startMonth = Carbon::now()->subMonths(11)->startOfMonth();
-                $data = Pallets::selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, SUM(jumlah) as total')
+                $data = PalletBalken::selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, SUM(jumlah) as total')
                     ->whereDate('created_at', '>=', $startMonth)
                     ->groupBy('month')
                     ->orderBy('month')
@@ -80,6 +80,6 @@ class TotalBalken extends ChartWidget
 
     protected function getType(): string
     {
-        return 'line'; 
+        return 'line';
     }
 }

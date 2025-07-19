@@ -3,47 +3,68 @@
 namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 
-class KubikasiBalken extends Tallies
+class KubikasiBalken extends TallyBalken
 {
-     protected $table = 'tallies'; 
+     protected $table = 'tally_balken';
 
      public static function queryWithTotalTagihan(): Builder
 {
     return static::query()
-        ->leftJoin('pallets', 'tallies.id', '=', 'pallets.tally_id')
+        ->leftJoin('pallet_balken', 'tally_balken.id', '=', 'pallet_balken.tally_id')
         ->leftJoinSub(
             \DB::table('costs')
                 ->selectRaw('grade, harga')
                 ->where('tipe', 'balken'),
             'filtered_costs',
-            fn($join) => $join->on(\DB::raw('UPPER(pallets.grade)'), '=', 'filtered_costs.grade')
+            fn($join) => $join->on(\DB::raw('UPPER(pallet_balken.grade)'), '=', 'filtered_costs.grade')
         )
         ->selectRaw('
-            MIN(tallies.id) as id,
-            tallies.nomor_polisi, 
-            DATE(tallies.created_at) as created_at, 
-            COALESCE(SUM(pallets.volume /1000000 * filtered_costs.harga), 0) as total_tagihan
+            MIN(tally_balken.id) as id,
+            tally_balken.nomor_polisi,
+            DATE(tally_balken.created_at) as created_at,
+            COALESCE(SUM(pallet_balken.volume /1000000 * filtered_costs.harga), 0) as total_tagihan
         ')
-        ->groupByRaw('tallies.nomor_polisi, DATE(tallies.created_at)')
-        ->orderByRaw('DATE(tallies.created_at) asc, tallies.nomor_polisi asc');
+        ->groupByRaw('tally_balken.nomor_polisi, DATE(tally_balken.created_at)')
+        ->orderByRaw('DATE(tally_balken.created_at) asc, tally_balken.nomor_polisi asc');
 }
      public static function rekapPerGrade(string $nomorPolisi, string $tanggal): \Illuminate\Support\Collection
 {
     $grades = ['kotak', 'ongrade', 'allgrade', 'ds4', 'afkir'];
-
-    $rekap = Pallets::join('tallies', 'pallets.tally_id', '=', 'tallies.id')
+    $rekap = PalletBalken::join('tally_balken', 'pallet_balken.tally_id', '=', 'tally_balken.id')
         ->selectRaw('
-            LOWER(pallets.grade) as grade_key,
-            pallets.grade,
-            SUM(pallets.jumlah) as total_jumlah,
-            SUM(pallets.volume) as total_volume
+            LOWER(pallet_balken.grade) as grade_key,
+            pallet_balken.grade,
+            SUM(pallet_balken.jumlah) as total_jumlah,
+            SUM(pallet_balken.volume) as total_volume
         ')
-        ->where('tallies.nomor_polisi', $nomorPolisi)
-        ->whereDate('tallies.created_at', $tanggal)
-        ->groupBy('pallets.grade')
+        ->where('tally_balken.nomor_polisi', $nomorPolisi)
+        ->whereDate('tally_balken.created_at', $tanggal)
+        ->groupBy('pallet_balken.grade')
         ->get()
         ->keyBy('grade_key');
+    return collect($grades)->map(function ($grade) use ($rekap) {
+        $data = $rekap->get(strtolower($grade));
+        return (object) [
+            'grade' => strtoupper($grade),
+            'total_jumlah' => $data?->total_jumlah ?? 0,
+            'total_volume' => $data?->total_volume / 1000000 ?? 0,
+        ];
+    });
+}
 
+public static function rekapPerGradeInKilnDry(string $kilndries_id){
+    $grades = ['kotak', 'ongrade', 'allgrade', 'ds4', 'afkir'];
+    $rekap = PalletBalken::join('tally_balken', 'pallet_balken.tally_id', '=', 'tally_balken.id')
+        ->selectRaw('
+            LOWER(pallet_balken.grade) as grade_key,
+            pallet_balken.grade,
+            SUM(pallet_balken.jumlah) as total_jumlah,
+            SUM(pallet_balken.volume) as total_volume
+        ')
+        ->where('tally_balken.kiln_dries_id', $kilndries_id)
+        ->groupBy('pallet_balken.grade')
+        ->get()
+        ->keyBy('grade_key');
     return collect($grades)->map(function ($grade) use ($rekap) {
         $data = $rekap->get(strtolower($grade));
         return (object) [
@@ -55,11 +76,11 @@ class KubikasiBalken extends Tallies
 }
 public static function hitungTotalTagihan(string $nomorPolisi, string $tanggal, \Illuminate\Support\Collection $costs): float
 {
-    return Pallets::join('tallies', 'pallets.tally_id', '=', 'tallies.id')
-        ->selectRaw('pallets.grade, SUM(pallets.volume) as total_volume')
-        ->where('tallies.nomor_polisi', $nomorPolisi)
-        ->whereDate('tallies.created_at', $tanggal)
-        ->groupBy('pallets.grade')
+    return PalletBalken::join('tally_balken', 'pallet_balken.tally_id', '=', 'tally_balken.id')
+        ->selectRaw('pallet_balken.grade, SUM(pallet_balken.volume) as total_volume')
+        ->where('tally_balken.nomor_polisi', $nomorPolisi)
+        ->whereDate('tally_balken.created_at', $tanggal)
+        ->groupBy('pallet_balken.grade')
         ->get()
         ->sum(function ($item) use ($costs) {
             $grade = strtoupper($item->grade);
@@ -67,23 +88,23 @@ public static function hitungTotalTagihan(string $nomorPolisi, string $tanggal, 
             return ($item->total_volume / 1000000) * $harga;
         });
 }
-public static function detailPallets(string $nomorPolisi, string $tanggal, int $perPage = 5)
+public static function detailpallet_balken(string $nomorPolisi, string $tanggal, int $perPage = 5)
 {
-    return Pallets::join('tallies', 'pallets.tally_id', '=', 'tallies.id')
+    return PalletBalken::join('tally_balken', 'pallet_balken.tally_id', '=', 'tally_balken.id')
         ->selectRaw('
-            pallets.grade,
-            pallets.tebal,
-            pallets.lebar,
-            pallets.panjang,
-            SUM(pallets.jumlah) as total_jumlah,
-            SUM(pallets.volume) / 1000000 as total_volume
+            pallet_balken.grade,
+            pallet_balken.tebal,
+            pallet_balken.lebar,
+            pallet_balken.panjang,
+            SUM(pallet_balken.jumlah) as total_jumlah,
+            SUM(pallet_balken.volume) / 1000000 as total_volume
         ')
-        ->where('tallies.nomor_polisi', $nomorPolisi)
-        ->whereDate('tallies.created_at', $tanggal)
-        ->groupBy('pallets.grade', 'pallets.tebal', 'pallets.lebar', 'pallets.panjang')
-        ->orderBy('pallets.grade', 'asc')
-        ->orderBy('pallets.tebal', 'desc')
-        ->orderBy('pallets.lebar', 'desc')
+        ->where('tally_balken.nomor_polisi', $nomorPolisi)
+        ->whereDate('tally_balken.created_at', $tanggal)
+        ->groupBy('pallet_balken.grade', 'pallet_balken.tebal', 'pallet_balken.lebar', 'pallet_balken.panjang')
+        ->orderBy('pallet_balken.grade', 'asc')
+        ->orderBy('pallet_balken.tebal', 'desc')
+        ->orderBy('pallet_balken.lebar', 'desc')
         ->paginate($perPage);
 }
 

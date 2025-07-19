@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\TallyResource\Pages;
+namespace App\Filament\Resources\TallyBalkenResource\Pages;
 
-use App\Filament\Resources\TallyResource;
+use App\Filament\Resources\TallyBalkenResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
-class ListTallies extends ListRecords
+class ListTallyBalken extends ListRecords
 {
-    protected static string $resource = TallyResource::class;
+    protected static string $resource = TallyBalkenResource::class;
 
     protected function getHeaderActions(): array
     {
