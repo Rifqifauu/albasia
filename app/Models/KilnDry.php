@@ -17,9 +17,15 @@ class KilnDry extends Model
         'tanggal_bongkar',
         'keterangan',
     ];
-   public function details()
+   public function balken()
+
 {
     return $this->hasMany(TallyBalken::class, 'kiln_dries_id');
+}
+   public function log()
+
+{
+    return $this->hasMany(TallyLog::class, 'kiln_dries_id');
 }
 
 }

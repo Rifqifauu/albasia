@@ -8,7 +8,7 @@ class TallyLog extends Model
 {
     protected $fillable =  [
         'no_register',
-        'total_balken',
+        'total_log',
         'total_volume',
         'nomor_polisi',
         'tally_man',

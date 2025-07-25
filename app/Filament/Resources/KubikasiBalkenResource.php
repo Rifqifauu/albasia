@@ -22,13 +22,15 @@ use Carbon\Carbon;
 
 
 
-    
+
 
 
 class KubikasiBalkenResource extends Resource
 {
     protected static ?string $model = KubikasiBalken::class;
     protected static ?int $navigationSort = 4;
+        protected static ?string $navigationGroup = 'Manajemen Balken';
+
     protected static ?string $navigationLabel = 'Kubikasi Balken';
     protected static ?string $navigationIcon = 'heroicon-o-queue-list';
 
@@ -49,7 +51,7 @@ class KubikasiBalkenResource extends Resource
                     ->date(),
                 TextColumn::make('nomor_polisi')
                     ->label('Nomor Polisi'),
-               
+
                 TextColumn::make('total_tagihan')
                     ->label('Total Tagihan')
                     ->money('IDR')
@@ -155,7 +157,7 @@ class KubikasiBalkenResource extends Resource
         ];
     }
 
-   
+
 
     public static function canCreate(): bool
     {

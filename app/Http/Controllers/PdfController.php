@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Payrolls;
-use App\Models\Tallies;
+use App\Models\TallyBalken;
+use App\Models\TallyLog;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use chillerlan\QRCode\QRCode;
@@ -20,7 +21,29 @@ class PdfController extends Controller
         return $pdf->download('Slip-Gaji-' . preg_replace('/[^a-zA-Z0-9-_]/', '_', $record->employee->nama) . '.pdf');
     }
 
-    public function tally(Tallies $record)
+    public function tallybalken(TallyBalken $record)
+    {
+        $qrCode = (new QRCode(
+            new QROptions([
+                'outputType' => QRCode::OUTPUT_IMAGE_PNG,
+                'imageBase64' => true,
+                'scale' => 8,
+            ])
+        ))->render($record->no_register);
+
+        $pdf = Pdf::loadView('pdf.tally', [
+            'tally' => $record,
+            'qrCode' => $qrCode,
+        ])->setPaper([0, 0, 298, 430], 'landscape'); // slip custom mm
+
+        $filename = 'Tally-' . preg_replace('/[^a-zA-Z0-9-_]/', '_', $record->no_register) . '.pdf';
+
+        return response()->streamDownload(
+            fn () => print($pdf->stream()),
+            $filename
+        );
+    }
+    public function tallylog(TallyLog $record)
     {
         $qrCode = (new QRCode(
             new QROptions([

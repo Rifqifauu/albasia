@@ -33,6 +33,7 @@ class TallyBalkenResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
     protected static ?string $navigationLabel = 'Tally Balken';
+        protected static ?string $navigationGroup = 'Manajemen Balken';
 
     public static function form(Form $form): Form
 {
@@ -70,7 +71,7 @@ class TallyBalkenResource extends Resource
     ->label('Download PDF')
     ->icon('heroicon-o-arrow-down-tray')
     ->color('success')
-    ->url(fn ($record) => route('tally.download.pdf', $record)) // 👈 ganti jadi URL
+    ->url(fn ($record) => route('tallybalken.download.pdf', $record)) // 👈 ganti jadi URL
     ->openUrlInNewTab(),
             ])
             ->filters([

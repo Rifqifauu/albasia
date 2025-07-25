@@ -13,7 +13,7 @@ use Illuminate\Support\HtmlString;
 
 class DetailsRelationManager extends RelationManager
 {
-    protected static string $relationship = 'details';
+    protected static string $relationship = 'balken'; // Relationship for Balken
 
     public function form(Form $form): Form
     {
@@ -71,7 +71,6 @@ class DetailsRelationManager extends RelationManager
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
-
                 Action::make('view')
                     ->label('Lihat Detail')
                     ->icon('heroicon-m-eye')
