@@ -5,8 +5,10 @@ namespace App\Filament\Resources\KilnDryResource\Pages;
 use App\Models\TallyLog;
 use App\Models\TallyBalken;
 use App\Models\KilnDry;
-use App\Models\KubikasiBalken; // Add this line
-use App\Models\KubikasiLog; // Add this line
+
+use App\Models\KubikasiBalken;
+use App\Models\KubikasiLog;
+use Filament\Actions\Action;
 use Filament\Resources\Pages\Page;
 
 class DetailsKilnDry extends Page
@@ -18,25 +20,49 @@ class DetailsKilnDry extends Page
     public $balkenData;
     public $logData;
     public $kilnDryRecord;
-    public $rekapGradeLog; // Add this property
-    public $rekapGradeBalken; // Add this property
+    public $rekapGradeLog;
+    public $rekapGradeBalken;
 
-    // Fetch data based on kndId
     public function mount($kndId)
     {
         $this->kilnDryRecord = KilnDry::findOrFail($kndId);
         $this->balkenData = TallyBalken::where('kiln_dries_id', $kndId)->get();
         $this->logData = TallyLog::where('kiln_dries_id', $kndId)->get();
 
-        // Fetch rekap per grade data
         $this->rekapGradeBalken = KubikasiBalken::rekapPerGradeInKilnDry($kndId);
         $this->rekapGradeLog = KubikasiLog::rekapPerGradeInKilnDry($kndId);
     }
+public function setStatus($id)
+{
+    TallyLog::where('kiln_dries_id', $id)->update(['is_stock' => false]);
+    TallyBalken::where('kiln_dries_id', $id)->update(['is_stock' => false]);
+}
 
     protected function getHeaderActions(): array
-    {
-        return [
-            // Add any header actions you need
-        ];
-    }
+{
+    return [
+        Action::make('bongkarSekarang')
+    ->label('Bongkar Sekarang')
+    ->visible(fn () => is_null($this->kilnDryRecord->tanggal_bongkar))
+    ->action(function () {
+        $this->kilnDryRecord->tanggal_bongkar = now()->toDateString();
+        $this->kilnDryRecord->save();
+
+        $this->setStatus($this->kilnDryRecord->id); // Panggil function setStatus
+
+        $this->dispatch('refresh');
+    })
+    ->after(function () {
+        \Filament\Notifications\Notification::make()
+            ->title('Sukses!')
+            ->body('Tanggal bongkar berhasil diset, status stok di-update.')
+            ->success()
+            ->send();
+    })
+    ->requiresConfirmation()
+    ->color('success')
+    ->icon('heroicon-o-calendar-days'),
+    ];
+}
+
 }

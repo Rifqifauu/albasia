@@ -21,7 +21,7 @@ class TallyBalken extends Model
         return $this->hasMany(PalletBalken::class,'tally_id');
     }
     public function kilndry(){
-        return $this->belongsTo(KilnDry::class);
+        return $this->belongsTo(KilnDry::class, 'kiln_dries_id');
     }
 
 }

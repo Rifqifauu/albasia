@@ -46,7 +46,7 @@
 .then(response => {
     if (response.ok) {
         // Redirect ke halaman detail KilnDry (atau sesuaikan dengan route yang kamu pakai)
-        window.location.href = `/admin/kiln-dries/${kilnDryId}`;
+        window.location.href = `/admin/kiln-dries/details-kiln-dry/${kilnDryId}`;
     } else {
         resultContainer.textContent = 'Gagal mengirim data ke server.';
         alreadyScanned = false;

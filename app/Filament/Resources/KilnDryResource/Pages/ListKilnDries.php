@@ -16,4 +16,11 @@ class ListKilnDries extends ListRecords
             Actions\CreateAction::make(),
         ];
     }
+      protected function getHeaderWidgets(): array
+    {
+        return [
+    \App\Filament\Widgets\KilnDryOverview::class,
+];
+
+    }
 }

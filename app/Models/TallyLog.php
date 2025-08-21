@@ -20,6 +20,6 @@ class TallyLog extends Model
         return $this->hasMany(PalletLog::class,'tally_id');
     }
     public function kilndry(){
-        return $this->belongsTo(KilnDry::class);
+        return $this->belongsTo(KilnDry::class,'kiln_dries_id');
     }
 }

@@ -82,11 +82,7 @@ class KilnDryResource extends Resource
                     ->label('Perkiraan Bongkar')
                     ->date()
                     ->sortable(),
-                TextColumn::make('tanggal_bongkar')
-                    ->label('Tanggal Bongkar')
-                    ->date()
-                    ->sortable(),
-                TextColumn::make('keterangan')
+                             TextColumn::make('keterangan')
                     ->label('Keterangan')
                     ->searchable()
                     ->wrap()

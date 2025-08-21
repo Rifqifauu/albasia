@@ -44,18 +44,15 @@ class KubikasiBalkenResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-->modifyQueryUsing(fn () => KubikasiBalken::queryWithTotalTagihan())
+->modifyQueryUsing(fn () => KubikasiBalken::queryWithTotalTagihandanJumlah())
             ->columns([
                 TextColumn::make('created_at')
                     ->label('Tanggal Tally')
                     ->date(),
                 TextColumn::make('nomor_polisi')
                     ->label('Nomor Polisi'),
-
-                TextColumn::make('total_tagihan')
-                    ->label('Total Tagihan')
-                    ->money('IDR')
-                    ->sortable(),
+                      TextColumn::make('total_jumlah')
+                    ->label('Total Balken'),
             ])
             ->filters([
                 // Filter berdasarkan tanggal
@@ -124,7 +121,6 @@ class KubikasiBalkenResource extends Resource
                         return null;
                     }),
             ])
-            ->defaultSort('total_tagihan', 'desc')
             ->actions([
                 Tables\Actions\Action::make('view')
                     ->label('Lihat Detail')

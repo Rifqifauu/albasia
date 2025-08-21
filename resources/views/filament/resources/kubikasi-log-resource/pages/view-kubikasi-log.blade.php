@@ -25,15 +25,6 @@
                 {{ \Carbon\Carbon::parse($tanggal)->format('d F Y') }}
             </span>
         </div>
-
-
-    </div>
-</div>
-
-
-    {{-- Summary Cards --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-        <x-filament::card class="rounded-xl shadow-sm">
             <div class="text-center space-y-1">
                 <p class="text-sm text-gray-600 dark:text-gray-300 font-medium">
                     Total Jumlah Log
@@ -41,22 +32,12 @@
                 <p class="text-3xl font-bold text-gray-800 dark:text-gray-300">
                     {{ number_format($total_jumlah) }}
                 </p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">log</p>
             </div>
-        </x-filament::card>
 
-        <x-filament::card class="rounded-xl shadow-sm">
-            <div class="text-center space-y-1">
-                <p class="text-sm text-gray-600 dark:text-gray-300 font-medium">
-                    Total Tagihan
-                </p>
-                <p class="text-3xl font-bold text-success-700 dark:text-info-500">
-                {{ 'Rp ' . number_format($total_tagihan, 0) }}
-
-                </p>
-            </div>
-        </x-filament::card>
     </div>
+</div>
+
+
 </x-filament::card>
 
 
@@ -93,25 +74,21 @@
                             <th class="px-4 py-3 text-primary-800 dark:text-primary-200">Grade</th>
                             <th class="px-4 py-3 text-right dark:text-primary-500">Jumlah</th>
                             <th class="px-4 py-3 text-right dark:text-primary-500">Volume</th>
-                            <th class="px-4 py-3 text-right dark:text-primary-500">Harga <span class="text-xs">/m3</span></th>
-                            <th class="px-4 py-3 text-right dark:text-primary-500">Total Harga </th>
+
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
     @foreach ($pallets as $pallet)
         @php
             $grade = strtoupper($pallet->grade);
-            $hargaPerM = $cost[$grade]->harga ?? 0;
-            $totalHarga = $pallet->total_volume * $hargaPerM;
+
         @endphp
         <tr class="hover:bg-primary-50 dark:hover:bg-primary-500/10 transition-colors">
             <td class="px-4 py-3">
                 <div class="flex items-center gap-2">
                     <div class="w-3 h-3 rounded-full
-                        {{ $pallet->grade === 'kotak' ? 'bg-info-700' : '' }}
-                        {{ $pallet->grade === 'ongrade' ? 'bg-success-700' : '' }}
-                        {{ $pallet->grade === 'allgrade' ? 'bg-primary-700' : '' }}
-                        {{ $pallet->grade === 'ds4' ? 'bg-warning-700' : '' }}
+
+                        {{ $pallet->grade === 'rijek' ? 'bg-warning-700' : '' }}
                         {{ $pallet->grade === 'afkir' ? 'bg-danger-700' : '' }}">
                     </div>
                     <span class="font-medium text-primary-900 dark:text-white">
@@ -124,12 +101,6 @@
             </td>
             <td class="px-4 py-3 text-right text-primary-900 dark:text-white">
                 {{ number_format($pallet->total_volume , 4, ',','')}} m3
-            </td>
-            <td class="px-4 py-3 text-right text-primary-900 dark:text-white">
-                {{ 'Rp ' . number_format($hargaPerM, 2, ',', '.') }}
-            </td>
-            <td class="px-4 py-3 text-right text-primary-900 dark:text-white">
-                {{ 'Rp ' . number_format($totalHarga, 2, ',', '.') }}
             </td>
         </tr>
     @endforeach

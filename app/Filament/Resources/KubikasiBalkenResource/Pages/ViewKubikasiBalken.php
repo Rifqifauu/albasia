@@ -19,25 +19,16 @@ class ViewKubikasiBalken extends Page
     public $pallets;
     public int $total_jumlah = 0;
     public float $total_volume = 0;
-    public $cost;
-    public $total_tagihan;
+
 
 public function mount(): void
 {
     $this->tanggal = request()->route('tanggal');
     $this->nomor_polisi = request()->route('nomor_polisi');
 
-    $this->cost = Cost::where('tipe', 'balken')
-        ->get()
-        ->keyBy(fn($item) => strtoupper($item->grade));
 
     $this->pallets = KubikasiBalken::rekapPerGrade($this->nomor_polisi, $this->tanggal);
 
-    $this->total_tagihan = KubikasiBalken::hitungTotalTagihan(
-        $this->nomor_polisi,
-        $this->tanggal,
-        $this->cost
-    );
 
     $this->total_jumlah = $this->pallets->sum('total_jumlah');
     $this->total_volume = $this->pallets->sum('total_volume');

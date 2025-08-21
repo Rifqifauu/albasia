@@ -20,7 +20,6 @@ class ViewKubikasiLog extends Page
     public int $total_jumlah = 0;
     public float $total_volume = 0;
     public $cost;
-    public $total_tagihan;
 
     public function mount(): void
     {
@@ -46,11 +45,6 @@ class ViewKubikasiLog extends Page
                 session()->flash('warning', 'Data tidak ditemukan untuk nomor polisi dan tanggal yang dipilih.');
             }
 
-            $this->total_tagihan = KubikasiLog::hitungTotalTagihan(
-                $this->nomor_polisi,
-                $this->tanggal,
-                $this->cost
-            );
 
             $this->total_jumlah = $this->pallets->sum('total_jumlah');
             $this->total_volume = $this->pallets->sum('total_volume');
@@ -61,7 +55,6 @@ class ViewKubikasiLog extends Page
 
             // Set default values
             $this->pallets = collect();
-            $this->total_tagihan = 0;
             $this->total_jumlah = 0;
             $this->total_volume = 0;
         }

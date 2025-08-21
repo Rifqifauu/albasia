@@ -11,14 +11,9 @@ class KubikasiBalkenOverview extends BaseWidget
 {
     protected function getStats(): array
     {
-        $tagihanHariIni = KubikasiBalken::queryWithTotalTagihan()
-            ->whereDate('tally_balken.created_at', Carbon::today())
-            ->pluck('total_tagihan')->sum();
+
         return [
-            Stat::make('Total Tagihan Hari Ini', 'Rp ' . number_format($tagihanHariIni))
-                ->description('Tagihan yang tercatat hari ini')
-                ->descriptionIcon('heroicon-m-arrow-trending-up')
-                ->color('success'),
+
         ];
     }
 }

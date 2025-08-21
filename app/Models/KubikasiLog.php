@@ -7,7 +7,7 @@ class KubikasiLog extends TallyLog
 {
      protected $table = 'tally_log';
 
-     public static function queryWithTotalTagihan(): Builder
+    public static function queryWithTotalTagihanDanJumlah(): Builder
 {
     return static::query()
         ->leftJoin('pallet_log', 'tally_log.id', '=', 'pallet_log.tally_id')
@@ -22,15 +22,16 @@ class KubikasiLog extends TallyLog
             MIN(tally_log.id) as id,
             tally_log.nomor_polisi,
             DATE(tally_log.created_at) as created_at,
-            COALESCE(SUM(pallet_log.volume /1000000 * filtered_costs.harga), 0) as total_tagihan
+            COALESCE(SUM(pallet_log.volume /1000000 * filtered_costs.harga), 0) as total_tagihan,
+            COALESCE(SUM(pallet_log.jumlah), 0) as total_jumlah
         ')
         ->groupByRaw('tally_log.nomor_polisi, DATE(tally_log.created_at)')
         ->orderByRaw('DATE(tally_log.created_at) asc, tally_log.nomor_polisi asc');
 }
      public static function rekapPerGrade(string $nomorPolisi, string $tanggal): \Illuminate\Support\Collection
 {
-    $grades = ['kotak', 'ongrade', 'allgrade', 'ds4', 'afkir'];
-    $rekap = Palletlog::join('tally_log', 'pallet_log.tally_id', '=', 'tally_log.id')
+    $grades = ['rijek', 'afkir'];
+    $rekap = PalletLog::join('tally_log', 'pallet_log.tally_id', '=', 'tally_log.id')
         ->selectRaw('
             LOWER(pallet_log.grade) as grade_key,
             pallet_log.grade,
@@ -51,10 +52,27 @@ class KubikasiLog extends TallyLog
         ];
     });
 }
+public static function rekapStokDanProduksi(): \Illuminate\Support\Collection
+{
+    return PalletLog::join('tally_log', 'pallet_log.tally_id', '=', 'tally_log.id')
+        ->selectRaw('
+            pallet_log.grade,
+            pallet_log.tebal,
+            tally_log.is_stock,
+            SUM(pallet_log.jumlah) as total_jumlah,
+            SUM(pallet_log.volume) as total_volume
+        ')
+        ->groupBy('pallet_log.grade', 'pallet_log.tebal', 'tally_log.is_stock')
+        ->get()
+        ->map(function ($item) {
+            $item->total_volume = $item->total_volume / 1000000; // konversi ke m³
+            return $item;
+        });
+}
 
 public static function rekapPerGradeInKilnDry(string $kilndries_id){
-    $grades = ['kotak', 'ongrade', 'allgrade', 'ds4', 'afkir'];
-    $rekap = Palletlog::join('tally_log', 'pallet_log.tally_id', '=', 'tally_log.id')
+    $grades = ['afkir','rijek'];
+    $rekap = PalletLog::join('tally_log', 'pallet_log.tally_id', '=', 'tally_log.id')
         ->selectRaw('
             LOWER(pallet_log.grade) as grade_key,
             pallet_log.grade,
@@ -76,7 +94,7 @@ public static function rekapPerGradeInKilnDry(string $kilndries_id){
 }
 public static function hitungTotalTagihan(string $nomorPolisi, string $tanggal, \Illuminate\Support\Collection $costs): float
 {
-    return Palletlog::join('tally_log', 'pallet_log.tally_id', '=', 'tally_log.id')
+    return PalletLog::join('tally_log', 'pallet_log.tally_id', '=', 'tally_log.id')
         ->selectRaw('pallet_log.grade, SUM(pallet_log.volume) as total_volume')
         ->where('tally_log.nomor_polisi', $nomorPolisi)
         ->whereDate('tally_log.created_at', $tanggal)
@@ -90,7 +108,7 @@ public static function hitungTotalTagihan(string $nomorPolisi, string $tanggal, 
 }
 public static function detailpallet_log(string $nomorPolisi, string $tanggal, int $perPage = 5)
 {
-    return Palletlog::join('tally_log', 'pallet_log.tally_id', '=', 'tally_log.id')
+    return PalletLog::join('tally_log', 'pallet_log.tally_id', '=', 'tally_log.id')
         ->selectRaw('
             pallet_log.grade,
             pallet_log.tebal,

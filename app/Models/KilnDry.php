@@ -28,4 +28,6 @@ class KilnDry extends Model
     return $this->hasMany(TallyLog::class, 'kiln_dries_id');
 }
 
+
+
 }

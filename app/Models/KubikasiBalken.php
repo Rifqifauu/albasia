@@ -6,8 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 class KubikasiBalken extends TallyBalken
 {
      protected $table = 'tally_balken';
-
-     public static function queryWithTotalTagihan(): Builder
+  public static function queryWithTotalTagihanDanJumlah(): Builder
 {
     return static::query()
         ->leftJoin('pallet_balken', 'tally_balken.id', '=', 'pallet_balken.tally_id')
@@ -22,10 +21,29 @@ class KubikasiBalken extends TallyBalken
             MIN(tally_balken.id) as id,
             tally_balken.nomor_polisi,
             DATE(tally_balken.created_at) as created_at,
-            COALESCE(SUM(pallet_balken.volume /1000000 * filtered_costs.harga), 0) as total_tagihan
+            COALESCE(SUM(pallet_balken.volume /1000000 * filtered_costs.harga), 0) as total_tagihan,
+            COALESCE(SUM(pallet_balken.jumlah), 0) as total_jumlah
         ')
         ->groupByRaw('tally_balken.nomor_polisi, DATE(tally_balken.created_at)')
         ->orderByRaw('DATE(tally_balken.created_at) asc, tally_balken.nomor_polisi asc');
+}
+
+public static function rekapStokDanProduksi(): \Illuminate\Support\Collection
+{
+    return PalletBalken::join('tally_balken', 'pallet_balken.tally_id', '=', 'tally_balken.id')
+        ->selectRaw('
+            pallet_balken.grade,
+            pallet_balken.tebal,
+            tally_balken.is_stock,
+            SUM(pallet_balken.jumlah) as total_jumlah,
+            SUM(pallet_balken.volume) as total_volume
+        ')
+        ->groupBy('pallet_balken.grade', 'pallet_balken.tebal', 'tally_balken.is_stock')
+        ->get()
+        ->map(function ($item) {
+            $item->total_volume = $item->total_volume / 1000000; // konversi ke m³
+            return $item;
+        });
 }
      public static function rekapPerGrade(string $nomorPolisi, string $tanggal): \Illuminate\Support\Collection
 {
